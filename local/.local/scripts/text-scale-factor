@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -x
+declare -A sfactor
+sfactor[1920]=1.05
+sfactor[2k5]=1.2
+sfactor[builtin]=1.25
+
+# Check resolution of the primary display to be 1920x
+if (xrandr --listmonitors | grep '+\*[^ ]* 1920' -q); then
+    gsettings set org.gnome.desktop.interface text-scaling-factor ${sfactor[1920]}
+fi
+
+# QHD 2.5k
+if (xrandr --listmonitors | grep '0: +\*[^ ]* 2560' -q); then
+    gsettings set org.gnome.desktop.interface text-scaling-factor ${sfactor[2k5]}
+fi
+
+# Built-in display
+if (xrandr --listmonitors | grep '0: +\*[^ ]* 2160' -q); then
+    gsettings set org.gnome.desktop.interface text-scaling-factor ${sfactor[builtin]}
+fi

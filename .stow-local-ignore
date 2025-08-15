@@ -1,0 +1,13 @@
+\.git
+\.gitignore
+README.*
+LICENSE
+Makefile
+\.DS_Store
+.*\.md$
+
+# directories and sub "stowes"
+docs
+local
+nix
+packages

@@ -1,0 +1,7 @@
+#!/bin/bash
+export QT_QUICK_BACKEND=software
+export QT_QPA_PLATFORM=wayland
+# export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+
+# Run AmneziaVPN GUI
+exec AmneziaVPN "$@"
