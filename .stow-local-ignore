@@ -11,3 +11,4 @@ docs
 local
 nix
 packages
+systemd
