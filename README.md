@@ -13,7 +13,9 @@ git clone git@github.com:dennybaa/dotfiles.git
 # git clone https://github.com/dennybaa/dotfiles.git
 ```
 
-## install os package (apt)
+## Packages setup (system + nix)
+
+### Install OS packages (apt/debian)
 
 ```shell
 ~/dotfiles/packages/tools.sh
@@ -21,7 +23,7 @@ git clone git@github.com:dennybaa/dotfiles.git
 ~/dotfiles/packages/desktop.sh
 ```
 
-## Nix setup and profile packages
+### Install Nix profile packages
 
 Instructions on how to install nix https://nix.dev/install-nix.html
 
