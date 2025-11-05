@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x
 declare -A sfactor
 sfactor[1920]=1.05
 sfactor[2k5]=1.2
