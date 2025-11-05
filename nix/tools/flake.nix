@@ -23,29 +23,34 @@
           pkgs.jq
           pkgs.yq-go
           pkgs.zoxide
+          pkgs.bat
 
-          # containers
-          pkgs.toolbox
-          pkgs.podman
-          pkgs.k3d
-
-          # devops
-          pkgs.gh
-          pkgs.just
-          pkgs.argocd
-          pkgs.kubectl
-          pkgs.kubernetes-helm
-          pkgs.helmfile
-          pkgs.sops
-          pkgs.google-cloud-sdk
-
-          # latest versions
+          # langs
           latest.devenv
           latest.nushell
           latest.crossplane-cli
           latest.cue
           latest.kcl
           latest.kcl-language-server
+
+          # containers
+          pkgs.toolbox
+          pkgs.podman
+          pkgs.kind
+          pkgs.k9s
+
+          # devops
+          pkgs.gh
+          pkgs.just
+          pkgs.argocd
+          pkgs.kubectl
+          pkgs.helmfile
+          pkgs.sops
+          # Customize google cloud sdk
+          (pkgs.google-cloud-sdk.withExtraComponents( with pkgs.google-cloud-sdk.components; [
+            gke-gcloud-auth-plugin
+          ]))
+          latest.kubernetes-helm
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

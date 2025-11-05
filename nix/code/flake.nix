@@ -17,9 +17,14 @@
       };
     in {
       default = pkgs.buildEnv {
-        name = "desktop";
+        name = "code";
         paths = [
-          latest.vscode
+          pkgs.nodejs_24
+
+          # python
+          pkgs.python3
+          pkgs.python312Packages.pip
+          pkgs.uv
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

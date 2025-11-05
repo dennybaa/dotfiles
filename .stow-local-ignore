@@ -7,7 +7,9 @@ Makefile
 .*\.md$
 
 # directories and sub "stowes"
+stowes
 docs
-local
 nix
 packages
+systemd
+scripts
