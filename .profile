@@ -17,16 +17,16 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] && [[ ":$PATH:" != *":$HOME/bin:"* ]] ; then
+if [ -d "$HOME/bin" ] && echo "$PATH" | grep -qvw "$HOME/bin"; then
     PATH="$HOME/bin:$PATH"
 fi
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]] ; then
+if [ -d "$HOME/.local/bin" ] && echo "$PATH" | grep -qvw "$HOME/.local/bin"; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/scripts" ] && [[ ":$PATH:" != *":$HOME/.local/scripts:"* ]] ; then
+if [ -d "$HOME/.local/scripts" ] && echo "$PATH" | grep -qvw "$HOME/.local/scripts"; then
     PATH="$HOME/.local/scripts:$PATH"
 fi

@@ -19,7 +19,6 @@
       default = pkgs.buildEnv {
         name = "desktop";
         paths = [
-          latest.amnezia-vpn
           latest.vscode
         ];
         pathsToLink = [ "/bin" "/share" ];

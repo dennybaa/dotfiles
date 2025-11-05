@@ -1,19 +1,33 @@
-.PHONY: all local dots systemd remove-systemd remove-all
+.PHONY: $(shell grep -E '^[a-zA-Z_-]+:' $(MAKEFILE_LIST) | cut -d: -f1)
+SHELL := /bin/bash
 
 # Default target
-all: dots local
+all: base
+desktop: base packages-desktop nix-desktop
 
-local:
-	stow -v local
+base: packages-base
+	$(MAKE) nix-tools
+	$(MAKE) nix-code
 
-systemd:
-	stow -v systemd
+packages-base:
+	./packages/base.sh
+	$(MAKE) nix-tools
 
-remove-systemd:
-	stow -D systemd
+packages-desktop:
+	./packages/desktop.sh
 
-dots:
+# dynamic target to install nix profiles
+nix-%:
+	@cd nix/$* && nix profile install .
+
+stow:
 	stow -v .
 
-remove-all:
-	stow -D . local systemd
+stow-systemd:
+	mkdir -p ~/.config/systemd && cd stowes/.config/systemd && stow -v -t ~/.config/systemd . || :
+
+stow-all: stow stow-systemd
+
+stow-clean:
+	cd stowes/.config/systemd && stow -D -v -t ~/.config/systemd . || :
+	stow -D -v .
