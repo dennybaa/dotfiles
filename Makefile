@@ -20,6 +20,9 @@ packages-desktop:
 nix-%:
 	@cd nix/$* && nix profile install .
 
+nixup-%:
+	nix flake update --flake ./nix/$* && nix profile upgrade nix/$*
+
 stow:
 	stow -v .
 

@@ -7,7 +7,7 @@ sudo apt install -y \
     git \
     bind9-dnsutils tcpdump wireguard \
     uidmap \
-    zsh neovim direnv stow \
+    zsh vim direnv stow \
     htop atop tree lsof \
     wget curl
 

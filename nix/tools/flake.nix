@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
@@ -24,6 +24,7 @@
           pkgs.yq-go
           pkgs.zoxide
           pkgs.bat
+          pkgs.stow
 
           # langs
           latest.devenv
@@ -36,6 +37,10 @@
           # containers
           pkgs.toolbox
           pkgs.podman
+          pkgs.docker-client
+          pkgs.docker-credential-helpers
+          pkgs.docker-compose
+          pkgs.docker-buildx
           pkgs.kind
           pkgs.k9s
 

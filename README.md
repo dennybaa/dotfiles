@@ -41,48 +41,51 @@ echo "access-tokens = github.com=$(gh auth token)" >> ~/.config/nix/nix.conf
 chmod 600 ~/.config/nix/nix.conf
 ```
 
-#### 3. Install Nix Profiles
-```shell
-# Install various profile groups
-make nix-desktop    # Desktop applications
-make nix-tools      # Development tools
-make nix-code       # Coding environment
-# ... and others as needed
-```
-
-## Profile Management
-
-### Install Specific Profile
-```shell
-# Install tools profile
-cd ~/dotfiles/nix/tools && nix profile install .
-```
-
-### Upgrade Profiles
-```shell
-# Upgrade tools profile
-nix profile upgrade nix/tools
-```
-
-## Make commands
-
-### Stowing links (dotfiles)
-
-To populate home directory with configuration files form this repository run the bellow commands:
-
-```shell
-make stow
-
-# also creates addition links, such as for systemd (stored in stowes/ directory)
-make stow-all
-```
-
-### Install packages
-
-- Install base packages including (nix/tools): `make base` (`make all`)
-- Install desktop packages including (nix/desktop): `make desktop`
-
-## Notes
+**Notes**:
 - Ensure you have proper permissions for GitHub repository access
 - The `gh auth token` command automatically retrieves your current authentication token
 - Keep your nix.conf secure as it contains authentication tokens
+
+#### 3. Install Nix Profiles
+
+Use dynamic make tagrets to install nix profiles available in `nix/<profile>` directories.
+
+```shell
+make nix-desktop    # Desktop applications
+make nix-tools      # Development tools
+make nix-code       # Coding environment
+```
+
+## Make Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| **Nix Profile Management** |
+| `make nix-<profile>` | Install Nix profile, eg: `make nix-tools` |
+| `make nixup-<profile>` | Update Nix profile, eg: `make nixup-tools` |
+| **Dotfiles Management** |
+| `make stow` | Populate home directory with configuration files |
+| `make stow-all` | Create all links including additional ones (systemd, etc.) |
+| `make stow-clean` | Undo stow-all (systemd, etc.) |
+| **Package Installation** |
+| `make base` | Install base packages (including Nix tools) |
+| `make all` | Alias for `make base` |
+| `make desktop` | Install desktop packages (including Nix desktop) |
+
+**Note:** The `stow-all` command creates additional links stored in the `stowes/` directory, such as for systemd services.
+
+
+## Additional Details
+
+### Nix profile managment (cli operations)
+
+* Install a profile:
+    ```shell
+    cd ~/dotfiles/nix/tools && nix profile install .
+    ```
+* Upgrade a profile:
+    ```shell
+    # update flake.lock
+    nix flake update --flake ./nix/tools
+    nix profile upgrade nix/tools
+    ```
