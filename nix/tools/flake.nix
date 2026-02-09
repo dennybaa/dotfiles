@@ -25,6 +25,7 @@
           pkgs.zoxide
           pkgs.bat
           pkgs.stow
+          latest.mise  
 
           # langs
           latest.devenv
