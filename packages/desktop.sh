@@ -36,7 +36,6 @@ sudo apt install -y \
 flatpak install -y \
     com.brave.Browser \
     org.gimp.GIMP \
-    com.getmailspring.Mailspring \
     org.telegram.desktop \
     com.slack.Slack \
     us.zoom.Zoom
