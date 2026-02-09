@@ -24,6 +24,7 @@
           pkgs.yq-go
           pkgs.zoxide
           pkgs.bat
+          pkgs.stow
 
           # langs
           latest.devenv
