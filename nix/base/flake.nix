@@ -15,11 +15,20 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
+
     in {
       default = pkgs.buildEnv {
-        name = "desktop";
+        name = "base";
         paths = [
-          latest.vscode
+          # common shell tools
+          pkgs.zoxide
+          pkgs.stow
+          latest.gum
+          latest.mise
+          latest.nushell
+
+          # extra tools
+          pkgs.gh
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

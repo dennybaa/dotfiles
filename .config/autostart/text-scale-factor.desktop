@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Text Scale Factor
+Comment=Tune Gnome Scale factor
+Exec=/bin/bash -c "sleep 5 && $HOME/.local/scripts/text-scale-factor"
+Path=$HOME/.local/scripts/
+StartupNotify=false
+Terminal=false
+Icon=preferences-desktop-font
+Categories=Utility;Settings;
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5

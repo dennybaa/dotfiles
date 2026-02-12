@@ -5,11 +5,11 @@ LICENSE
 Makefile
 \.DS_Store
 .*\.md$
+*\.sh$
+*\.nu$
 
 # directories and sub "stowes"
 stowes
 docs
 nix
-packages
-systemd
-scripts
+nu

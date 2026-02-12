@@ -19,22 +19,6 @@
       default = pkgs.buildEnv {
         name = "cli-tools";
         paths = [
-          # cli
-          pkgs.jq
-          pkgs.yq-go
-          pkgs.zoxide
-          pkgs.bat
-          pkgs.stow
-          latest.mise  
-
-          # langs
-          latest.devenv
-          latest.nushell
-          latest.crossplane-cli
-          latest.cue
-          latest.kcl
-          latest.kcl-language-server
-
           # containers
           pkgs.toolbox
           pkgs.podman
@@ -46,8 +30,6 @@
           pkgs.k9s
 
           # devops
-          pkgs.gh
-          pkgs.just
           pkgs.argocd
           pkgs.kubectl
           pkgs.helmfile

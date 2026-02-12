@@ -18,29 +18,34 @@
 
     in {
       default = pkgs.buildEnv {
-        name = "code";
+        name = "devops";
         paths = [
-          # common
-          pkgs.jq
-          pkgs.yq-go
-          pkgs.bat
-          pkgs.just
+          # common container tools
+          pkgs.toolbox
+          pkgs.podman
+          pkgs.docker-client
+          pkgs.docker-credential-helpers
+          pkgs.docker-compose
+          pkgs.docker-buildx
+          pkgs.kind
+          pkgs.k9s
 
-          pkgs.nodejs_24
-          pkgs.go
+          # other
+          pkgs.sops
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];
       };
 
-      desktop = pkgs.buildEnv {
-        name = "code-desktop";
+      cloud = pkgs.buildEnv {
+        name = "devops-cloud-tools";
         paths = [
           # all default
           self.packages.x86_64-linux.default
 
-          # desktop tools
-          latest.vscode
+          (pkgs.google-cloud-sdk.withExtraComponents( with pkgs.google-cloud-sdk.components; [
+            gke-gcloud-auth-plugin
+          ]))
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];
