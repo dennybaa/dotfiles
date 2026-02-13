@@ -11,7 +11,7 @@ fi
 # install nix
 if (! which nix >& /dev/null); then
     echo "Bootstrapping nix..."
-    sudo apt update && sudo apt install -y git wget curl
+    sudo apt update && sudo apt install -y git sed wget curl
     curl -L https://nixos.org/nix/install | sh -s -- --daemon
 
     # enable flakes

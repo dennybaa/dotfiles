@@ -1,6 +1,7 @@
 use std/util null_device
 
 # Predefined colors
+export const spinnerDefault = [ --spinner=minidot --spinner.foreground=44 ]
 export const color = {
     default: 6
     sudo: 202
@@ -8,13 +9,17 @@ export const color = {
     cyan: 6
     red: 9
     green: 42
+    lightBlue: 44
+    warning: 214
 }
+
 
 export def "gum print" [
     message: string
-    --color=6
+    --color=44
+    --padding="0 0"
 ] {
-    ^gum style --foreground $color $message
+    ^gum style --padding $padding --foreground $color $message
 }
 
 # Check if sudo password is requied to be aquired
@@ -47,9 +52,9 @@ export def "sudo tee" [
 # Aquire sudo privileges
 export def "sudo aquire" [message] {
     # Inform of operation to be carried out
-    gum style --foreground $color.default $message
+    gum style --padding="1 0 0 0" --foreground $color.default $message
     if (sudo password-required) {
-        gum print --color $color.sudo "Aquiring privileges to perform action 🔥..."
+        gum print --color $color.sudo "👷 Aquiring privileges to perform action!"
         try { ^sudo -i true } catch {|e|
             gum style --foreground $color.red 'Operation failed!'
             exit $e.exit_code
@@ -61,14 +66,16 @@ export def "sudo aquire" [message] {
 export def "write gpg-key" [
     path: string
     --keyURL: string = ""
-] {
+]: nothing -> bool {
     if not ($path | path exists) and ($keyURL | is-not-empty) {
         http get $keyURL | do {
             sudo aquire $'Writing gpg key into ($path)...'
             $in | ^sudo gpg --dearmor -o $path
             gum print --color=$color.green $"✅ Added ($path)"
         }
+        return true
     }
+    return false
 }
 
 # Add source items (passed as input) into a source file.
@@ -109,13 +116,13 @@ export def "apt add-sources" [
         $i.line | parse -r '.*?signed-by=(?P<keypath>[\w\/.]+).*' |
             if ($in | is-not-empty) { 
                 write gpg-key --keyURL=($i | get -o keyURL) ($in.keypath | first)
-                $rs = true
+                    | if ($in) { $rs = true }
             }
     }
     return $rs
 }
 
 export def "sudo apt-update" [] {
-    sudo aquire "Updating apt sources..."
+    sudo aquire "Updating Apt sources..."
     ^sudo apt update
 }
