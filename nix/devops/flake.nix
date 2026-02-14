@@ -38,7 +38,7 @@
       };
 
       cloud = pkgs.buildEnv {
-        name = "devops-cloud-tools";
+        name = "devops-cloud";
         paths = [
           # all default
           self.packages.x86_64-linux.default

@@ -22,9 +22,13 @@ arg "[bundle]" var=#true    help="Specifies which software bundles to provision"
 '''
 run = './nu/install-packages.nu flatpak ${usage_update:+--update} ${usage_bundle}'
 
-[tasks."nix:list"]
-description = "List nix profiles"
+[tasks."nix:profiles:ls"]
+description = "List installed nix profiles"
 run="nix profile list"
+
+[tasks."nix:profiles"]
+description = "List nix profiles"
+run="ls -1 nix/*/flake.nix | sed 's@/flake.nix@@'"
 
 [tasks.nix]
 description = "Provision (install/update) Nix packages"
@@ -34,3 +38,29 @@ flag "-u --update"                              help="Update nix profile (forces
 flag "-o --output <output>" default="default"   help="Specify flake package output (see the corresponding flake.nix aka desktop/cloud etc)"
 '''
 run='./nu/install-packages.nu nix ${usage_update:+--update} --output=${usage_output} ${usage_profile}'
+
+
+[tasks.provision]
+description = "Provision default workstation"
+usage = '''
+flag "-u --update"          help="Update packages"
+'''
+run = [
+    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
+    'exec mise run nix ${usage_update:+--update} base',
+    'exec mise run nix ${usage_update:+--update} code',
+    'exec mise run nix ${usage_update:+--update} --output=cloud devops',
+]
+
+
+[tasks."provision:desktop"]
+description = "Provision default workstation"
+usage = '''
+flag "-u --update"          help="Update packages"
+'''
+run = [
+    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
+    'exec mise run nix ${usage_update:+--update} base',
+    'exec mise run nix ${usage_update:+--update} --output=desktop code',
+    'exec mise run nix ${usage_update:+--update} --output=cloud devops',
+]

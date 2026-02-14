@@ -84,7 +84,7 @@ export def 'main nix' [
         # Note! that changes to flake.nix might not
         lib gum print --padding="1 0 0 0" $'Installing nix/($profile) profile...'
         if ($profileExists) {
-            $"Note: changes in flake.nix might be not reflected if not tracked by git.\n\tYou can use --update (-u) to force profile update." |
+            $"Note: Changes in flake.nix might be not reflected if not tracked by git.\n      You can use --update (-u) to force profile update." |
                 lib gum print --padding="0 0 1 0" --color=$color.warning $in
         }
         do { cd ./nix/($profile); nix profile install $flake_output }

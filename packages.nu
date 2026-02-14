@@ -45,7 +45,6 @@ let AptPackages = {
         megasync
         syncthing-gtk
         transmission-gtk
-        keepassxc
         remmina
     ]
 }
