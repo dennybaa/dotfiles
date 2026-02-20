@@ -10,32 +10,17 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
-
+      
       latest = import unstable {
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
+
     in {
       default = pkgs.buildEnv {
-        name = "cli-tools";
+        name = "devops";
         paths = [
-          # cli
-          pkgs.jq
-          pkgs.yq-go
-          pkgs.zoxide
-          pkgs.bat
-          pkgs.stow
-          latest.mise  
-
-          # langs
-          latest.devenv
-          latest.nushell
-          latest.crossplane-cli
-          latest.cue
-          latest.kcl
-          latest.kcl-language-server
-
-          # containers
+          # common container tools
           pkgs.toolbox
           pkgs.podman
           pkgs.docker-client
@@ -45,18 +30,22 @@
           pkgs.kind
           pkgs.k9s
 
-          # devops
-          pkgs.gh
-          pkgs.just
-          pkgs.argocd
-          pkgs.kubectl
-          pkgs.helmfile
+          # other
           pkgs.sops
-          # Customize google cloud sdk
+        ];
+        pathsToLink = [ "/bin" "/share" ];
+        extraOutputsToInstall = [ "out" "bin" ];
+      };
+
+      cloud = pkgs.buildEnv {
+        name = "devops-cloud";
+        paths = [
+          # all default
+          self.packages.x86_64-linux.default
+
           (pkgs.google-cloud-sdk.withExtraComponents( with pkgs.google-cloud-sdk.components; [
             gke-gcloud-auth-plugin
           ]))
-          latest.kubernetes-helm
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

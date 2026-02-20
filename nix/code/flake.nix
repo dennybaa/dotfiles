@@ -15,12 +15,32 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
+
     in {
       default = pkgs.buildEnv {
         name = "code";
         paths = [
+          # common
+          pkgs.jq
+          pkgs.yq-go
+          pkgs.bat
+          pkgs.just
+
           pkgs.nodejs_24
           pkgs.go
+        ];
+        pathsToLink = [ "/bin" "/share" ];
+        extraOutputsToInstall = [ "out" "bin" ];
+      };
+
+      desktop = pkgs.buildEnv {
+        name = "code-desktop";
+        paths = [
+          # all default
+          self.packages.x86_64-linux.default
+
+          # desktop tools
+          latest.vscode
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

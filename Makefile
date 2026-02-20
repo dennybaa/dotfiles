@@ -2,26 +2,7 @@
 SHELL := /bin/bash
 
 # Default target
-all: base
-desktop: base packages-desktop nix-desktop
-
-base: packages-base
-	$(MAKE) nix-tools
-	$(MAKE) nix-code
-
-packages-base:
-	./packages/base.sh
-	$(MAKE) nix-tools
-
-packages-desktop:
-	./packages/desktop.sh
-
-# dynamic target to install nix profiles
-nix-%:
-	@cd nix/$* && nix profile install .
-
-nixup-%:
-	nix flake update --flake ./nix/$* && nix profile upgrade nix/$*
+all:
 
 stow:
 	stow -v .
