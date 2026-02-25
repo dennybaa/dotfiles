@@ -23,6 +23,12 @@ let AptSources = {
             keyURL: "https://mega.nz/keys/MEGA_signing.key"
         }
     ]
+    github: [
+        {
+            line: $"deb [arch=($APT_ARCH) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+            keyURL: "https://cli.github.com/packages/githubcli-archive-keyring.gpg"
+        }
+    ]
 }
 
 ## APT packages bundles
@@ -39,6 +45,8 @@ let AptPackages = {
         tree
         lsof
         syncthing
+        gh
+        libsecret-1-0
     ]
     desktop: [
         warp-terminal

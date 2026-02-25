@@ -1,0 +1,13 @@
+[settings]
+disable_backends = ["asdf"]
+
+[plugins]
+fnox-env = "https://github.com/jdx/mise-env-fnox"
+
+[env]
+MISE_GITHUB_TOKEN = { value = "{{ exec(command='get-local-secret github-public-token') }}" }
+# _.fnox-env = { tools = true }
+
+[tools]
+fnox = "latest"
+zoxide = "latest"

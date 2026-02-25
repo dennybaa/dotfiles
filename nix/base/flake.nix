@@ -20,15 +20,13 @@
       default = pkgs.buildEnv {
         name = "base";
         paths = [
-          # common shell tools
-          pkgs.zoxide
-          pkgs.stow
+          # bootstrap required tools
+          latest.chezmoi
+          latest.stow
+          latest.delta
           latest.gum
           latest.mise
           latest.nushell
-
-          # extra tools
-          pkgs.gh
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

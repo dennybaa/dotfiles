@@ -23,7 +23,6 @@
           # common
           pkgs.jq
           pkgs.yq-go
-          pkgs.bat
           pkgs.just
 
           pkgs.nodejs_24
