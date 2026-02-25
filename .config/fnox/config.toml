@@ -1,0 +1,3 @@
+[providers.keychain]
+type = "keychain"
+service = "fnox"

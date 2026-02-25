@@ -21,7 +21,6 @@
         name = "devops";
         paths = [
           # common container tools
-          pkgs.toolbox
           pkgs.podman
           pkgs.docker-client
           pkgs.docker-credential-helpers

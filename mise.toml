@@ -51,6 +51,9 @@ run = [
     'exec mise run nix ${usage_update:+--update} code',
     'exec mise run nix ${usage_update:+--update} --output=cloud devops',
 ]
+depends_post = [
+    "setup:podman"
+]
 
 
 [tasks."provision:desktop"]
@@ -64,3 +67,20 @@ run = [
     'exec mise run nix ${usage_update:+--update} --output=desktop code',
     'exec mise run nix ${usage_update:+--update} --output=cloud devops',
 ]
+depends_post = [
+    "setup:podman",
+    "setup:keepassxc"
+]
+
+[tasks."setup:stow"]
+description = "Stow directory structure"
+run = "stow -v --no-folding ."
+
+
+[tasks."setup:unstow"]
+description = "Unstow directory structure"
+run = "stow -v --no-folding ."
+
+[tasks.bootstrap]
+description = "Runs necessary tasks for the bootstrap stage"
+depends = ["setup:stow"]

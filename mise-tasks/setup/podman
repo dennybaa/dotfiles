@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#MISE description="Configure Podman .config/systemd files"
+#USAGE flag "-c --clean" help="Cleanup action"
+
+set -e
+cd .config/systemd && mkdir -p ~/.config/systemd
+
+# Stow nix user's Podman systemd files
+if [ "${usage_clean:-false}" = "true"  ]; then
+    stow -v -D --no-folding -t ~/.config/systemd .
+else
+    stow -v --no-folding -t ~/.config/systemd/ .
+fi

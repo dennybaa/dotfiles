@@ -114,7 +114,7 @@ export def "apt add-sources" [
     # Write a gpg file if needed
     for i in $input {
         let keyURL = $i | get -o keyURL
-        $i.line | parse -r '.*?signed-by=(?P<keypath>[\w\/.]+).*' |
+        $i.line | parse -r '.*?signed-by=(?P<keypath>[^\s\]]+).*' |
             if ($in | is-not-empty) and ($keyURL | is-not-empty) {
                 write gpg-key --keyURL=($i | get -o keyURL) ($in.keypath | first)
                     | if ($in) { $rs = true }

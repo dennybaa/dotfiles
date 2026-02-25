@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#MISE description="Store GitHub token into keychain and setup tools"
+#USAGE flag "-u --update" help="Update acion"
+
+set -e
+TOPD=$MISE_ORIGINAL_CWD
+
+# Check env
+if [ ! -f ~/.config/nix/nix.conf ]; then
+    gum style --foreground=${colors[red]} "Run \`mise run setup' first!" && exit 1
+fi
+. "$TOPD"/mise-tasks/helpers/lib.sh
+
+
+function create-token() {
+    gum style --foreground=${colors[gum]} --bold "Create/update GitHub token for public repositories! Go to https://github.com/settings/personal-access-tokens to create one!"
+    read -r gh_token < <(gum input --prompt="Enter your GitHub token: " --password)
+    if [ -z "$gh_token" ]; then
+        gum style --foreground=${colors[red]} "Input required!" && exit 1
+    fi
+    set-secret github-public-token "${gh_token}"
+}
+
+
+## Need to create or update token
+gh_token=$(get-secret github-public-token)
+
+# create or update token
+if [ -z "$gh_token" ] || [ "${usage_update}" == "true" ]; then
+    create-token
+fi
+
+# apply changes
+if ( chezmoi status | grep -q "\.config/nix/nix\.conf" ); then
+    chezmoi apply --interactive
+fi

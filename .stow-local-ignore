@@ -1,17 +1,19 @@
 \.git
 \.gitignore
-README.*
+README\..*
 LICENSE
 Makefile
 \.DS_Store
 .*\.md$
-*\.sh$
-*\.nu$
-mise.toml$
+.*\.sh$
+.*\.nu$
 
-# directories and sub "stowes"
-stowes
-docs
-nix
-nu
-hooks
+# Project files to ignore (or ignore by default)
+/\.config/systemd
+/\.chezmoiroot
+/mise\.toml
+/docs
+/nix
+/nu
+/mise-tasks
+/chezmoi

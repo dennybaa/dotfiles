@@ -31,68 +31,39 @@ The provision phase installs required software and applies system configurations
 
 ### Bootstrap
 
-Bootstrap installs Nix on your Debian-based system—the first step to using this repository.
+1. Bootstrap installs Nix on your Debian-based system—the first step to using this repository.
 
-```shell
-cd ~/dotfiles
-./bootstrap.sh
-```
+    ```shell
+    cd ~/dotfiles
 
-Once bootstrapped, proceed with the full provisioning **using mise tasks**.
+    # Installs nix if not available
+    ./bootstrap.sh
 
-<!-- #### 1. Authenticate with GitHub
-```shell
-# Login to GitHub CLI
-gh auth login
-```
+    # Runs other necessry bootstrap steps
+    mise run bootstrap
+    ```
 
-#### 2. Configure Nix Authentication
-```shell
-# Create nix configuration directory and set GitHub token
-mkdir -p ~/.config/nix
-echo "access-tokens = github.com=$(gh auth token)" >> ~/.config/nix/nix.conf
-chmod 600 ~/.config/nix/nix.conf
-```
+    Once bootstrapped, proceed with full provisioning **using mise tasks**.
 
-**Notes**:
-- Ensure you have proper permissions for GitHub repository access
-- The `gh auth token` command automatically retrieves your current authentication token
-- Keep your nix.conf secure as it contains authentication tokens
- -->
+2. **Configure GitHub token for tools**
+
+   > **Why this matters**: Configuring authentication prevents GitHub API rate limiting when package managers like Nix or mise fetch sources.
+
+   **Recommended approach**: Create and use a fine-grained personal access token (PAT) for:
+   - Generate a token at: https://github.com/settings/personal-access-tokens for only public repositories
+
+   **Use the `setup:github-token` task**: This will prompt you for the token input and update necessary files:
+   ```shell
+   mise run setup:github-token
+   ```
 
 ## Workstation Configuration
 
 **Mise tasks**:
 
-| Task                  | Description |
-|-----------------------|-------------|
-| `nix`                 | Provision (install/update) Nix packages |
-| `nix:profiles`        | List Nix profiles |
-| `nix:profiles:ls`     | List installed Nix profiles |
-| `packages`            | Provision system packages (APT, Flatpak) |
-| `packages:apt`        | Provision APT packages |
-| `packages:flatpak`    | Provision Flatpak packages |
-| `provision`           | Provision default workstation (console) |
-| `provision:desktop`   | Provision default workstation (desktop) |
-
-For detailed information about a specific command, use the `--help` flag. For example:
 ```shell
-mise nix --help
-```
-
-This should output something similar to:
-
-```
-Usage: nix [-u --update] [-o --output <output>] <profile>
-
-Arguments:
-  <profile>  Specify which nix profile to (profiles under nix/*)
-
-Flags:
-  -u --update           Update nix profile (forces update even if flake.nix
-                        changes are not tracked)
-  -o --output <output>  Specify flake package output (see the corresponding
-                        flake.nix aka desktop/cloud etc)
+mise tasks
+mise run nix --help # (for nix task details)
 ```
 
 ### Provision a Pre-configured System Preset
@@ -136,15 +107,3 @@ mise nix -o desktop nix/code
 ```
 
 > **Note**: If you previously installed a different flake output for a given profile, the operation will fail.
-
-<!-- ## Make Commands Reference
-
-| Command | Description |
-|---------|-------------|
-| **Nix Profile Management** |
-| **Dotfiles Management** |
-| `make stow` | Populate home directory with configuration files |
-| `make stow-all` | Create all links including additional ones (systemd, etc.) |
-| `make stow-clean` | Undo stow-all (systemd, etc.) |
-
-**Note:** The `stow-all` command creates additional links stored in the `stowes/` directory, such as for systemd services. -->

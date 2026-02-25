@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+#MISE description="Grant access to Secrets Service socket (GCR - gnome crypto)"
+flatpak override --user --filesystem=xdg-run/gcr org.keepassxc.KeePassXC
