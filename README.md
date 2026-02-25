@@ -34,18 +34,18 @@ The provision phase installs required software and applies system configurations
 1. Bootstrap installs Nix on your Debian-based system—the first step to using this repository.
 
     ```shell
-    cd ~/dotfiles
-
-    # Installs nix if not available
-    ./bootstrap.sh
-
-    # Runs other necessry bootstrap steps
-    mise run bootstrap
+    cd ~/dotfiles && ./bootstrap.sh
     ```
 
     Once bootstrapped, proceed with full provisioning **using mise tasks**.
 
-2. **Configure GitHub token for tools**
+1. Run the necessary bootstrap hooks.
+
+    ```shell
+    mise run bootstrap
+    ```
+
+1. **Configure GitHub token for tools**
 
    > **Why this matters**: Configuring authentication prevents GitHub API rate limiting when package managers like Nix or mise fetch sources.
 
