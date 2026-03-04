@@ -34,7 +34,7 @@ The provision phase installs required software and applies system configurations
 1. Bootstrap installs Nix on your Debian-based system—the first step to using this repository.
 
     ```shell
-    cd ~/dotfiles && ./bootstrap.sh
+    cd ~/dotfiles && ./bootstrap.sh && . /etc/profile.d/nix.sh
     ```
 
     Once bootstrapped, proceed with full provisioning **using mise tasks**.

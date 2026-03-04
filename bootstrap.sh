@@ -9,7 +9,7 @@ fi
 
 
 # install nix
-if (! which nix >& /dev/null); then
+if [ -e /etc/profile.d/nix.sh ]; then
     echo "Bootstrapping nix..."
     sudo apt update && sudo apt install -y git sed wget curl
     curl -L https://nixos.org/nix/install | sh -s -- --daemon
@@ -18,6 +18,7 @@ if (! which nix >& /dev/null); then
     mkdir -p ~/.config/nix
     echo 'experimental-features = nix-command flakes' > ~/.config/nix/nix.conf
     bootstrapped=y
+    . /etc/profile.d/nix.sh
 fi
 
 
