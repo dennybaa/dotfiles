@@ -9,7 +9,7 @@ fi
 
 
 # install nix
-if [ -e /etc/profile.d/nix.sh ]; then
+if [ ! -e /etc/profile.d/nix.sh ]; then
     echo "Bootstrapping nix..."
     sudo apt update && sudo apt install -y git sed wget curl
     curl -L https://nixos.org/nix/install | sh -s -- --daemon
