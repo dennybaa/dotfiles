@@ -18,11 +18,11 @@ if [ ! -e /etc/profile.d/nix.sh ]; then
     mkdir -p ~/.config/nix
     echo 'experimental-features = nix-command flakes' > ~/.config/nix/nix.conf
     bootstrapped=y
-    . /etc/profile.d/nix.sh
 fi
 
 
 # install nix/base profile 
+. /etc/profile.d/nix.sh
 if ( ! nix profile list | grep -wq 'nix/base' ); then
     echo "Installing nix/base profile..."
     (cd nix/base && nix profile install .)
