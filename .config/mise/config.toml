@@ -5,7 +5,7 @@ disable_backends = ["asdf"]
 fnox-env = "https://github.com/jdx/mise-env-fnox"
 
 [env]
-MISE_GITHUB_TOKEN = { value = "{{ exec(command='get-local-secret github-public-token') }}" }
+MISE_GITHUB_TOKEN = { value = "{{ exec(command='get-local-secret github-public-token || true') }}" }
 # _.fnox-env = { tools = true }
 
 [tools]
