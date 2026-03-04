@@ -11,24 +11,22 @@ let LSB = {
 
 ## Apt sources to populate
 let AptSources = {
-    warpdotdev: [
-        {
+    warpdotdev: [{
             line: $"deb [arch=($APT_ARCH) signed-by=/etc/apt/keyrings/warpdotdev.gpg] https://releases.warp.dev/linux/deb stable main"
             keyURL: "https://releases.warp.dev/linux/keys/warp.asc"
-        }
-    ]
-    megasync: [
-        {
+    }]
+    megasync: [{
             line: $"deb [arch=($APT_ARCH) signed-by=/usr/share/keyrings/meagsync.gpg] https://mega.nz/linux/repo/xUbuntu_($LSB.ShortRelease)/ ./"
             keyURL: "https://mega.nz/keys/MEGA_signing.key"
-        }
-    ]
-    github: [
-        {
+    }]
+    github: [{
             line: $"deb [arch=($APT_ARCH) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
             keyURL: "https://cli.github.com/packages/githubcli-archive-keyring.gpg"
-        }
-    ]
+    }]
+    zerotier: [{
+        line: "deb [signed-by=/usr/share/keyrings/zerotier-debian-package-key.gpg] http://download.zerotier.com/debian/bookworm bookworm main"
+        keyURL: "https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/contact%40zerotier.com.gpg"
+    }]
 }
 
 ## APT packages bundles
@@ -47,6 +45,7 @@ let AptPackages = {
         syncthing
         gh
         libsecret-1-0
+        zerotier-one
     ]
     desktop: [
         warp-terminal
