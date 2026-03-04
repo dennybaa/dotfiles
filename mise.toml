@@ -83,4 +83,5 @@ run = "stow -v --no-folding ."
 
 [tasks.bootstrap]
 description = "Runs necessary tasks for the bootstrap stage"
-depends = ["setup:stow"]
+run = "[ -L ~/.profile ] || rm ~/.profile"
+depends_post = ["setup:stow"]
