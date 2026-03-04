@@ -11,10 +11,6 @@ The setup process requires the [dennybaa/dotfiles](https://github.com/dennybaa/d
 ```shell
 sudo apt install git -y
 
-# Configure Git globally
-git config --global user.email "dennybaa@gmail.com"
-git config --global user.name "Denis Baryshev"
-
 # Clone the repository
 cd ~ && git clone git@github.com:dennybaa/dotfiles.git
 
@@ -39,7 +35,7 @@ The provision phase installs required software and applies system configurations
 
     Once bootstrapped, proceed with full provisioning **using mise tasks**.
 
-1. Run the necessary bootstrap hooks.
+1. Run the necessary bootstrap tasks (post-Nix setup).
 
     ```shell
     mise run bootstrap
