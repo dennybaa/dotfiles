@@ -62,7 +62,7 @@ usage = '''
 flag "-u --update"          help="Update packages"
 '''
 run = [
-    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
+    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} desktop',
     'exec mise run nix ${usage_update:+--update} base',
     'exec mise run nix ${usage_update:+--update} --output=desktop code',
     'exec mise run nix ${usage_update:+--update} --output=cloud devops',

@@ -118,3 +118,4 @@ fi
 
 # Add custom PATHs
 export PATH="$PATH:$HOME/.local/scripts:$HOME/.local/bin"
+export EDITOR=vim

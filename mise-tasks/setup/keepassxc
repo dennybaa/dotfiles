@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 #MISE description="Grant access to Secrets Service socket (GCR - gnome crypto)"
+# !Note: set Settings -> SSH Agent -> SSH_AUTH_SOCK to /run/user/1000/gcr/ssh
 flatpak override --user --filesystem=xdg-run/gcr org.keepassxc.KeePassXC

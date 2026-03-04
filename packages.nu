@@ -16,7 +16,7 @@ let AptSources = {
             keyURL: "https://releases.warp.dev/linux/keys/warp.asc"
     }]
     megasync: [{
-            line: $"deb [arch=($APT_ARCH) signed-by=/usr/share/keyrings/meagsync.gpg] https://mega.nz/linux/repo/xUbuntu_($LSB.ShortRelease)/ ./"
+            line: $"deb [signed-by=/usr/share/keyrings/meganz-archive-keyring.gpg] https://mega.nz/linux/repo/xUbuntu_($LSB.ShortRelease)/ ./"
             keyURL: "https://mega.nz/keys/MEGA_signing.key"
     }]
     github: [{
