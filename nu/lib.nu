@@ -125,5 +125,5 @@ export def "apt add-sources" [
 
 export def "sudo apt-update" [] {
     sudo aquire "Updating Apt sources..."
-    ^sudo apt update
+    ^sudo apt-get update
 }

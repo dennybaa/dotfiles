@@ -16,16 +16,13 @@ def 'main flatpak' [
     ...extra: string        # extra bundles to install
 ] {
     let update = if ($update) { ['--or-update'] } else { [] }
-    $FlatpakPackages | select -o ...[$bundle, ...$extra] | items {|bundle,  pkgs|
-        if ($pkgs | is-not-empty) {
-            [
-                ...$spinnerDefault --padding "1 0 0 0" --title $'Installing Flatpak bundle ($bundle)...'
-                --
-                flatpak install ...$update -y ...$pkgs
-            ] |
-                gum spin ...$in | print
+    let bundles = $FlatpakPackages | select -o ...[$bundle, ...$extra]
+    for e in ($bundles | items {|k, v| {bundle: $k, pkgs: $v}}) {
+        if ($e.pkgs | is-not-empty) {
+            lib gum print --padding="1 0 0 0" $'Installing Flatpak bundle ($e.bundle)...'
+                ^flatpak install ...$update -y ...$e.pkgs
         }
-    } | ignore
+   }
 }
 
 
@@ -46,16 +43,16 @@ def 'main apt' [
     bundle: string          # bundle to install (base/desktop etc)
     ...extra: string        # extra bundles to install
 ]: nothing -> nothing {
-    let updated = main apt add-sources
     # Refresh is needed
-    if ($update and not $updated) { lib sudo apt-update }
-
-    $AptPackages | select -o ...[$bundle, ...$extra] | items {|bundle,  pkgs|
-        if ($pkgs | is-not-empty) {
-            lib sudo aquire $'Installing Apt bundle ($bundle)...'
-            ^sudo apt-get install -y ...$pkgs | print
+    let sourcesAdded = main apt add-sources
+    if ($update or $sourcesAdded) { lib sudo apt-update }
+    let bundles = $AptPackages | select -o ...[$bundle, ...$extra]
+    for e in ($bundles | items {|k,  v| {bundle: $k, pkgs: $v}}) {
+        if ($e.pkgs | is-not-empty) {
+            lib sudo aquire $'Installing Apt bundle ($e.bundle)...'
+            ^sudo apt-get install -y ...$e.pkgs
         }
-    } | ignore
+    }
 }
 
 # Provision (install/refresh or upgrade) nix/<profile>
@@ -87,7 +84,7 @@ export def 'main nix' [
             $"Note: Changes in flake.nix might be not reflected if not tracked by git.\n      You can use --update (-u) to force profile update." |
                 lib gum print --padding="0 0 1 0" --color=$color.warning $in
         }
-        do { cd ./nix/($profile); nix profile install $flake_output }
+        do { cd ./nix/($profile); nix profile add $flake_output }
     } else {
         lib gum print --padding="1 0 0 0" $'Upgrading nix/($profile) profile...'
         nix flake update --flake ./nix/($profile); nix profile upgrade nix/($profile)

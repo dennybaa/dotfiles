@@ -62,7 +62,7 @@ usage = '''
 flag "-u --update"          help="Update packages"
 '''
 run = [
-    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
+    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} desktop',
     'exec mise run nix ${usage_update:+--update} base',
     'exec mise run nix ${usage_update:+--update} --output=desktop code',
     'exec mise run nix ${usage_update:+--update} --output=cloud devops',
@@ -76,12 +76,15 @@ depends_post = [
 description = "Stow directory structure"
 run = "stow -v --no-folding ."
 
-
 [tasks."setup:unstow"]
 description = "Unstow directory structure"
 run = "stow -v --no-folding ."
 
 [tasks.bootstrap]
 description = "Runs necessary tasks for the bootstrap stage"
-run = "[ -L ~/.profile ] || rm ~/.profile"
-depends_post = ["setup:stow"]
+run = [
+    # Enforce ~/dotfiles git version rather than adopted during bootstrap (differs from default stow behaviour)
+    # Basically we recreate links for .bashrc, .profile etc and stash adopted diff (moved by stow into ~/dotfiles).
+    "stow -v --no-folding --adopt . && git stash push -m 'post stow --adopt changes'",
+    "git restore ."
+]
