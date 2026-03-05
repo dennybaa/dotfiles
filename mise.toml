@@ -51,6 +51,7 @@ run = [
     'exec mise run nix ${usage_update:+--update} code',
     'exec mise run nix ${usage_update:+--update} --output=cloud devops',
 ]
+# Setup tasks
 depends_post = [
     "setup:podman"
 ]
@@ -65,11 +66,22 @@ run = [
     'exec mise run --jobs=1 packages:?* ${usage_update:+--update} desktop',
     'exec mise run nix ${usage_update:+--update} base',
     'exec mise run nix ${usage_update:+--update} --output=desktop code',
-    'exec mise run nix ${usage_update:+--update} --output=cloud devops',
+    'exec mise run nix ${usage_update:+--update} --output=cloud devops',  
 ]
+# Setup tasks
 depends_post = [
     "setup:podman",
     "setup:keepassxc"
+]
+
+
+[tasks.bootstrap]
+description = "Runs necessary tasks for the bootstrap stage"
+run = [
+    # Enforce ~/dotfiles git version rather than adopted during bootstrap (differs from default stow behaviour)
+    # Basically we recreate links for .bashrc, .profile etc and stash adopted diff (moved by stow into ~/dotfiles).
+    "stow -v --no-folding --adopt . && git stash push -m 'post stow --adopt changes'",
+    "git restore ."
 ]
 
 [tasks."setup:stow"]
@@ -80,11 +92,12 @@ run = "stow -v --no-folding ."
 description = "Unstow directory structure"
 run = "stow -v --no-folding ."
 
-[tasks.bootstrap]
-description = "Runs necessary tasks for the bootstrap stage"
+[tasks."setup:podman"]
+description = "Setup podman"
+usage = '''
+flag "-c --cleanup"          help="Cleanup"
+'''
 run = [
-    # Enforce ~/dotfiles git version rather than adopted during bootstrap (differs from default stow behaviour)
-    # Basically we recreate links for .bashrc, .profile etc and stash adopted diff (moved by stow into ~/dotfiles).
-    "stow -v --no-folding --adopt . && git stash push -m 'post stow --adopt changes'",
-    "git restore ."
+    'exec mise run setup:stow-nix-user-systemd ${usage_cleanup:+--cleanup} podman',
+    'exec mise run setup:podman-delegate ${usage_cleanup:+--cleanup}'
 ]

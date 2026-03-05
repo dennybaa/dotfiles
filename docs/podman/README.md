@@ -2,20 +2,11 @@
 
 ## recommended
 
-Run stow and create systemd user configuration:
+Though podman.service has `Delegate=true` which should delegate all available cgroup controllers.
 
-```shell
-cd ~/dotfiles
+## *optional* can be skipped (The k3d documentation shows a more granular approach)
 
-make package-base
-make stow-all
-```
-
-Actually podman.service has `Delegate=true` which should delegate all available cgroup controllers.
-
-## *optional* can be skiped (The k3d documentation shows a more granular approach)
-
-By default, a non-root user can only get memory controller and pids controller to be delegated.
+By default, a non-root user can only get memory controller and PIDs controller to be delegated.
 
 To run properly we need to enable CPU, CPUSET, and I/O delegation:
 

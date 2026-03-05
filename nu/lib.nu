@@ -22,7 +22,7 @@ export def "gum print" [
     ^gum style --padding $padding --foreground $color $message
 }
 
-# Check if sudo password is requied to be aquired
+# Check if sudo password is required to be acquired
 export def "sudo password-required" []: nothing -> bool  {
     (^sudo -n true | complete).exit_code > 0
 }
@@ -37,7 +37,7 @@ export def "sudo tee" [
     let teeopts = [ (if ($append) {"-a"}) $path ]
         | where ($it | is-not-empty)
     let content = $in
-    sudo aquire $message
+    sudo acquire $message
     try {
         if ($silent == true) {
             $content | ^sudo tee ...$teeopts o+e> $null_device
@@ -49,12 +49,12 @@ export def "sudo tee" [
     }
 }
 
-# Aquire sudo privileges
-export def "sudo aquire" [message] {
+# acquire sudo privileges
+export def "sudo acquire" [message] {
     # Inform of operation to be carried out
     gum style --padding="1 0 0 0" --foreground $color.default $message
     if (sudo password-required) {
-        gum print --color $color.sudo "👷 Aquiring privileges to perform action!"
+        gum print --color $color.sudo "👷 Acquiring privileges to perform action!"
         try { ^sudo -i true } catch {|e|
             gum style --foreground $color.red 'Operation failed!'
             exit $e.exit_code
@@ -69,7 +69,7 @@ export def "write gpg-key" [
 ]: nothing -> bool {
     if not ($path | path exists) and ($keyURL | is-not-empty) {
         http get $keyURL | do {
-            sudo aquire $'Writing gpg key into ($path)...'
+            sudo acquire $'Writing gpg key into ($path)...'
             $in | ^sudo gpg --dearmor -o $path
             gum print --color=$color.green $"✅ Added ($path)"
         }
@@ -89,10 +89,10 @@ export def "apt add-sources" [
     mut updated: list<record<line: string>> = []
 
     $input | if ($path | path exists) {
-        let conent = $path | open | lines # existing content
+        let content = $path | open | lines # existing content
         # build an update (consists of lines to add into source file)
         for i in $input {
-            $conent
+            $content
             | where $it == $i.line
             | if ($in | is-empty) { $updated = $updated | append $i } # no matches found, source file must be updated
         }
@@ -124,6 +124,6 @@ export def "apt add-sources" [
 }
 
 export def "sudo apt-update" [] {
-    sudo aquire "Updating Apt sources..."
+    sudo acquire "Updating Apt sources..."
     ^sudo apt-get update
 }

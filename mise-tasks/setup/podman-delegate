@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#MISE description="Podman setup delegate.conf"
+#USAGE flag "-c --cleanup" help="Cleanup action"
+TOPD=$MISE_ORIGINAL_CWD
+nu -c "source ${TOPD}/nu/lib.nu; sudo acquire 'Updating /etc/systemd/system/user@.service.d/delegate.conf...'"
+
+if [ "${usage_cleanup:-false}" = "false" ]; then
+    sudo mkdir -p /etc/systemd/system/user@.service.d
+    sudo tee /etc/systemd/system/user@.service.d/delegate.conf 1>/dev/null <<EOF
+[Service]
+Delegate=cpu cpuset io memory pids
+EOF
+else
+    sudo rm -f /etc/systemd/system/user@.service.d/delegate.conf
+fi
+
+sudo systemctl daemon-reload
+systemctl --user daemon-reload

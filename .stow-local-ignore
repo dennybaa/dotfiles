@@ -9,7 +9,7 @@ Makefile
 .*\.nu$
 
 # Project files to ignore (or ignore by default)
-/\.config/systemd
+/\.config/systemd/.*
 /\.chezmoiroot
 /mise\.toml
 /docs

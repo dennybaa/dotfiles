@@ -7,7 +7,7 @@ TOPD=$MISE_ORIGINAL_CWD
 
 # Check env
 if [ ! -f ~/.config/nix/nix.conf ]; then
-    gum style --foreground=${colors[red]} "Run \`mise run setup' first!" && exit 1
+    gum style --foreground=${colors[red]} "Run \`mise run bootstrap' first!" && exit 1
 fi
 . "$TOPD"/mise-tasks/helpers/lib.sh
 
