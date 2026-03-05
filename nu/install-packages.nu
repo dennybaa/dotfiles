@@ -49,7 +49,7 @@ def 'main apt' [
     let bundles = $AptPackages | select -o ...[$bundle, ...$extra]
     for e in ($bundles | items {|k,  v| {bundle: $k, pkgs: $v}}) {
         if ($e.pkgs | is-not-empty) {
-            lib sudo aquire $'Installing Apt bundle ($e.bundle)...'
+            lib sudo acquire $'Installing Apt bundle ($e.bundle)...'
             ^sudo apt-get install -y ...$e.pkgs
         }
     }
@@ -57,7 +57,7 @@ def 'main apt' [
 
 # Provision (install/refresh or upgrade) nix/<profile>
 export def 'main nix' [
-    --update (-u)                       # Set to refresh from Nix Store and flake.lock, effectivly updates profile packages
+    --update (-u)                       # Set to refresh from Nix Store and flake.lock, effectively updates profile packages
     --output (-o): string = "default"   # Specify which package output to use (see flake.nix)
     profile: string                     # Profile to provision
 ] {
