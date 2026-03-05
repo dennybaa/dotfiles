@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 echo "Usage: $0 stow ..."
+    exit 1
+else
+    echo "Creating systemd links pointing to ~/.nix-profile/share/systemd/user"
+fi
+
+find-relative() {
+    # Find file or symlink (without resolving) relative to home (appears as dotfiles/..../file)
+    find . -type f,l -exec realpath -s --relative-to=$HOME {} \;
+}
+
+
+for stow in "$@"; do
+    if [ -d "${SCRIPT_DIR}/${stow}" ]; then
+        
+        cd "${SCRIPT_DIR}/${stow}" && echo -n " - $stow "
+        find-relative | while read path; do
+            from_file=$(dirname $path | sed -E 's@[^/]+@..@g')
+            to_file=$(echo $path | sed -E "s@dotfiles/.config/systemd/${stow}/@@")
+            ln -sf "${from_file}/.nix-profile/share/systemd/user/$(basename $to_file)" "$to_file"
+        done
+        echo "✔"
+    else
+        continue
+    fi
+done

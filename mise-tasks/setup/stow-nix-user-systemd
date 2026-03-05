@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Stow user nix systemd configuration"
+#USAGE flag "-c --cleanup" help="Cleanup action"
+#USAGE arg "<target>" help="Target stow (podman etc)"
+
+set -e
+cd .config/systemd/$usage_target && mkdir -p ~/.config/systemd/user
+
+# Stow nix user's systemd files for <target>
+if [ "${usage_cleanup:-false}" = "false"  ]; then
+    stow -v --no-folding -t ~/.config/systemd/user .
+else
+    stow -v -D --no-folding -t ~/.config/systemd/user .
+fi

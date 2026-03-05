@@ -3,6 +3,7 @@ declare -A colors
 colors[default]=6
 colors[red]=9
 colors[gum]=212
+colors[warning]=214
 # sudo: 202
 # white: 7
 # cyan: 6
