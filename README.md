@@ -59,7 +59,7 @@ The provision phase installs required software and applies system configurations
 
 ```shell
 mise tasks
-mise run nix --help # (for nix task details)
+mise run nix:add --help # for details about the command adding packages from nix/<bundle> flakes into profile
 ```
 
 ### Provision a Pre-configured System Preset

@@ -42,6 +42,7 @@ let AptPackages = {
         atop
         tree
         lsof
+        grc
         syncthing
         gh
         libsecret-1-0

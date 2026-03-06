@@ -1,0 +1,13 @@
+#!/bin/sh
+. ~/.shell/functions
+_shell=$(_dot_shell)
+
+# Load mise-en-place (early since it may provides tools for plugins)
+if ( echo "zsh bash" | grep -qw $_shell ); then
+    eval "$(mise activate $_shell)"
+fi
+
+# Load antidote
+shell-source ~/.shell/antidote zsh
+
+unset _shell

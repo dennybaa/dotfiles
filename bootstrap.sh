@@ -21,13 +21,20 @@ if [ ! -e /etc/profile.d/nix.sh ]; then
 fi
 
 
-# install nix/base profile 
+# Load nix profile paths and add nix/base profile
 . /etc/profile.d/nix.sh
 if ( ! nix profile list | grep -wq 'nix/base' ); then
     echo "Installing nix/base profile..."
     (cd nix/base && nix profile install .)
     nix profile list
     bootstrapped=y
+fi
+
+# Fix nix provided zshrc to be included (zsh uses /etc/zsh/zshrc instead /etc/zshrc )
+if ( zsh -ixc : 2>&1 | grep -q 'etc/zsh/' ) && [ -f /etc/zshrc ]; then
+    if ! ( grep -q '^\. \/etc\/zshrc' /etc/zsh/zshrc ); then
+        echo -e "\n# Compat include\n. /etc/zshrc\n# Compat include Ends" | sudo tee -a /etc/zsh/zshrc >/dev/null
+    fi
 fi
 
 if [ -z "$bootstrapped" ]; then

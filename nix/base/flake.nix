@@ -27,6 +27,9 @@
           latest.gum
           latest.mise
           latest.nushell
+
+          # shell tools
+          latest.antidote
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];
