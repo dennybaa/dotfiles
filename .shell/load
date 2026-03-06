@@ -1,13 +1,20 @@
 #!/bin/sh
 . ~/.shell/functions
+# Detect shell
 _shell=$(_dot_shell)
+_supported_shell=$(echo "zsh bash" | grep -qw $_shell && echo 'true' || echo 'false')
 
-# Load mise-en-place (early since it may provides tools for plugins)
-if ( echo "zsh bash" | grep -qw $_shell ); then
+# Supported shell
+if [ "$_supported_shell" = "true" ]; then
+    # Load mise-en-place (early since it may provides tools for plugins)
     eval "$(mise activate $_shell)"
+
+    # Load starship
+    eval "$(starship init $_shell)"
 fi
 
 # Load antidote
-shell-source ~/.shell/antidote zsh
+shell_source ~/.shell/antidote zsh
 
-unset _shell
+# Cleanup
+unset -v _shell _supported_shell

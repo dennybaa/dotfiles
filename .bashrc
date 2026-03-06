@@ -117,4 +117,4 @@ if ! shopt -oq posix; then
 fi
 
 # Load shell tools (cleanup functions in the end)
-. ~/.shell/load && shell-cleanup
+. ~/.shell/load && shell_cleanup

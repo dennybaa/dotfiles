@@ -4,4 +4,4 @@
 . ~/.shell/env
 
 # Load shell tools (cleanup functions in the end)
-. ~/.shell/load && shell-cleanup
+. ~/.shell/load && shell_cleanup
