@@ -45,6 +45,7 @@ description = "Provision default workstation"
 usage = '''
 flag "-u --update"          help="Update packages"
 '''
+raw = true
 run = [
     'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
     'exec mise run nix:add ${usage_update:+--update} base',
@@ -62,11 +63,12 @@ description = "Provision default workstation"
 usage = '''
 flag "-u --update"          help="Update packages"
 '''
+raw = true
 run = [
-    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} desktop',
-    'exec mise run nix:add ${usage_update:+--update} base',
-    'exec mise run nix:add ${usage_update:+--update} --output=desktop code',
-    'exec mise run nix:add ${usage_update:+--update} --output=cloud devops',
+    'exec mise run --raw --jobs=1 packages:?* ${usage_update:+--update} base desktop',
+    'exec mise run --raw nix:add ${usage_update:+--update} base',
+    'exec mise run --raw nix:add ${usage_update:+--update} --output=desktop code',
+    'exec mise run --raw nix:add ${usage_update:+--update} --output=cloud devops',
 ]
 # Setup tasks
 depends_post = [
@@ -101,6 +103,7 @@ description = "Setup podman"
 usage = '''
 flag "-c --cleanup"          help="Cleanup"
 '''
+raw = true
 run = [
     'exec mise run setup:stow-nix-user-systemd ${usage_cleanup:+--cleanup} podman',
     'exec mise run setup:podman-delegate ${usage_cleanup:+--cleanup}'
