@@ -29,6 +29,7 @@
           latest.nushell
 
           # shell tools
+          latest.starship
           latest.antidote
         ];
         pathsToLink = [ "/bin" "/share" ];

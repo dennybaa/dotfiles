@@ -29,8 +29,8 @@ _dot_shell() {
 }
 
 # Cleanup
-_dot_define "shell-cleanup"
-shell-cleanup() {
+_dot_define "shell_cleanup"
+shell_cleanup() {
     for _f in $(echo $_DOT_FUNCS); do
         unset -f "$_f"
     done
@@ -38,8 +38,8 @@ shell-cleanup() {
 }
 
 # Source file (for ~/.shell/* scripts, can specify for which shells and whether not to clean up)
-_dot_define "shell-source"
-shell-source() {
+_dot_define "shell_source"
+shell_source() {
     _path="$1"; shift
     # Check if our shell matches
     case " $@ " in
