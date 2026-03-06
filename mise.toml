@@ -30,8 +30,8 @@ run="nix profile list"
 description = "List nix profiles"
 run="ls -1 nix/*/flake.nix | sed 's@/flake.nix@@'"
 
-[tasks.nix]
-description = "Provision (install/update) Nix packages"
+[tasks."nix:add"]
+description = "Provision (add/update) Nix flake packages profile"
 usage='''
 arg "profile"                                   help="Specify which nix profile to (profiles under nix/*)"
 flag "-u --update"                              help="Update nix profile (forces update even if flake.nix changes are not tracked)"
@@ -47,9 +47,9 @@ flag "-u --update"          help="Update packages"
 '''
 run = [
     'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
-    'exec mise run nix ${usage_update:+--update} base',
-    'exec mise run nix ${usage_update:+--update} code',
-    'exec mise run nix ${usage_update:+--update} --output=cloud devops',
+    'exec mise run nix:add ${usage_update:+--update} base',
+    'exec mise run nix:add ${usage_update:+--update} code',
+    'exec mise run nix:add ${usage_update:+--update} --output=cloud devops',
 ]
 # Setup tasks
 depends_post = [
@@ -64,9 +64,9 @@ flag "-u --update"          help="Update packages"
 '''
 run = [
     'exec mise run --jobs=1 packages:?* ${usage_update:+--update} desktop',
-    'exec mise run nix ${usage_update:+--update} base',
-    'exec mise run nix ${usage_update:+--update} --output=desktop code',
-    'exec mise run nix ${usage_update:+--update} --output=cloud devops',  
+    'exec mise run nix:add ${usage_update:+--update} base',
+    'exec mise run nix:add ${usage_update:+--update} --output=desktop code',
+    'exec mise run nix:add ${usage_update:+--update} --output=cloud devops',
 ]
 # Setup tasks
 depends_post = [
@@ -77,20 +77,24 @@ depends_post = [
 
 [tasks.bootstrap]
 description = "Runs necessary tasks for the bootstrap stage"
+depends = ["stow:adopt"]
+
+[tasks."stow"]
+description = "Stow directory structure"
+run = "stow -v --no-folding ."
+
+[tasks."stow:clean"]
+description = "Unstow directory structure"
+run = "stow -v --no-folding ."
+
+[tasks."stow:adopt"]
+description = "Stow adopt - adopts changes and stashes them (result is restored)"
 run = [
     # Enforce ~/dotfiles git version rather than adopted during bootstrap (differs from default stow behaviour)
     # Basically we recreate links for .bashrc, .profile etc and stash adopted diff (moved by stow into ~/dotfiles).
     "stow -v --no-folding --adopt . && git stash push -m 'post stow --adopt changes'",
     "git restore ."
 ]
-
-[tasks."setup:stow"]
-description = "Stow directory structure"
-run = "stow -v --no-folding ."
-
-[tasks."setup:unstow"]
-description = "Unstow directory structure"
-run = "stow -v --no-folding ."
 
 [tasks."setup:podman"]
 description = "Setup podman"

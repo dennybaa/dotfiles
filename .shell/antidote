@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+# Note! antidote uses .zsh_plugins.txt file
+#
+. ~/.shell/functions
+
+_dot_define "_dot_add_colorize_progs"
+_dot_add_colorize_progs() {
+    for prog in "$@"; do
+        function $prog() {
+            \grc --colour=auto $0 "$@"
+        }
+    done
+}
+
+# Good ones: native, stata-dark, dracula
+ZSH_COLORIZE_STYLE=stata-dark
+
+# Colorize additional tools
+_dot_add_colorize_progs ss
+
+# Load antidote
+. ~/.nix-profile/share/antidote/antidote.zsh
+antidote load

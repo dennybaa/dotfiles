@@ -116,6 +116,5 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# Add custom PATHs
-export PATH="$PATH:$HOME/.local/scripts:$HOME/.local/bin"
-export EDITOR=vim
+# Load shell tools (cleanup functions in the end)
+. ~/.shell/load && shell-cleanup
