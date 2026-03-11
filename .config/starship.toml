@@ -147,7 +147,7 @@ ssh_only = true
 ssh_symbol = "🌐 "
 trim_at = "."
 detect_env_vars = []
-format = "[$ssh_symbol$hostname]($style)"
+format = "[$ssh_symbol$hostname]($style) in"
 style = "flamingo dimmed bold"
 disabled = false
 
