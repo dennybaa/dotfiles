@@ -45,6 +45,7 @@ let AptPackages = {
         grc
         syncthing
         gh
+        tmux
         libsecret-1-0
         zerotier-one
     ]

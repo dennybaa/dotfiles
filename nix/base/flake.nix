@@ -31,6 +31,7 @@
           # shell tools
           latest.starship
           latest.antidote
+          latest.fzf
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];
