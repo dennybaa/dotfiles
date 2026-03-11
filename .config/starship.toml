@@ -1,24 +1,18 @@
-"$schema" = 'https://starship.rs/config-schema.json'
+"$schema" = "https://starship.rs/config-schema.json"
 
+continuation_prompt = "[∙](fg:lavender) "
 add_newline = true
+follow_symlinks = true
 palette = 'catppuccin_frappe'
-
-format = """
-[](red)\
-$os\
-[](bg:peach fg:red)\
-$directory\
-[](bg:yellow fg:peach)\
-$git_branch\
-$git_status\
-[](fg:yellow bg:sapphire)\
-$kubernetes\
-[](fg:sapphire bg:lavender)\
+format = """\
+${hostname}\
+(${sudo}${directory} [❯](blue bold) )\
+(${custom.git_dirty}${git_branch} [❯](yellow bold) )\
+($kubernetes [❯](teal bold) )\
 $time\
-[ ](fg:lavender)\
 $cmd_duration\
-$line_break\
-$character"""
+\n$character\
+"""
 
 [palettes.catppuccin_frappe]
 rosewater = "#f2d5cf"
@@ -48,95 +42,152 @@ base = "#303446"
 mantle = "#292c3c"
 crust = "#232634"
 
-[palettes.catppuccin_mocha]
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-subtext0 = "#a6adc8"
-overlay2 = "#9399b2"
-overlay1 = "#7f849c"
-overlay0 = "#6c7086"
-surface2 = "#585b70"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
-mantle = "#181825"
-crust = "#11111b"
 
-[os]
+[profiles]
+
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰁽 "
+empty_symbol = "󰂎 "
 disabled = false
-style = "bg:red fg:crust"
+format = "[$symbol$percentage]($style) "
 
-[directory]
-style = "bg:peach fg:crust"
-
-read_only_style = "bg:peach fg:crust"
-format = "[ $path ]($style)[$read_only ]($read_only_style)"
-truncation_length = 3
-truncation_symbol = "…/"
-
-[directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
-"Developer" = "󰲋 "
-
-[git_branch]
-symbol = ""
-style = "bg:yellow"
-format = '[[ $symbol $branch ](fg:crust bg:yellow)]($style)'
-ignore_branches = ['main', 'master']
-ignore_bare_repo = true
-
-[git_status]
-style = "bg:yellow"
-format = '[[($all_status$ahead_behind )](fg:crust bg:yellow)]($style)'
-
-[time]
-disabled = false
-time_format = "%R"
-style = "bg:lavender"
-format = '[[  $time ](fg:crust bg:lavender)]($style)'
-
-[line_break]
-disabled = false
+[[battery.display]]
+threshold = 10
+style = "red bold"
 
 [character]
+format = "$symbol "
+success_symbol = "[❯](bold green)"
+error_symbol = "[✗](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+vimcmd_visual_symbol = "[❮](bold yellow)"
+vimcmd_replace_symbol = "[❮](bold purple)"
+vimcmd_replace_one_symbol = "[❮](bold purple)"
 disabled = false
-success_symbol = '[❯](bold fg:green)'
-error_symbol = '[✘](bold fg:red)'
-vimcmd_symbol = '[❮](bold fg:green)'
-vimcmd_replace_one_symbol = '[❮](bold fg:lavender)'
-vimcmd_replace_symbol = '[❮](bold fg:lavender)'
-vimcmd_visual_symbol = '[❮](bold fg:yellow)'
 
 [cmd_duration]
 show_milliseconds = true
-format = " in $duration "
-style = "bg:lavender"
+format = "[ in $duration](pink)"
 disabled = false
 show_notifications = true
 min_time = 10_000
 min_time_to_notify = 45_000
 
+[container]
+format = '[$symbol \[$name\]]($style) '
+symbol = "⬢"
+style = "red bold dimmed"
+disabled = true
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+use_logical_path = true
+format = "[$path]($style)[$read_only]($read_only_style)"
+repo_root_format = "[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) "
+style = "blue bold"
+disabled = false
+read_only = "🔒"
+read_only_style = "red"
+truncation_symbol = ""
+home_symbol = "~"
+
+[directory.substitutions]
+
+[direnv]
+format = "[$symbol$loaded/$allowed]($style) "
+symbol = "direnv "
+style = "bold bright-yellow"
+disabled = true
+detect_extensions = []
+detect_env_vars = ["DIRENV_FILE"]
+detect_files = [".envrc"]
+detect_folders = []
+allowed_msg = "allowed"
+not_allowed_msg = "not allowed"
+denied_msg = "denied"
+loaded_msg = "loaded"
+unloaded_msg = "not loaded"
+
+
+[env_var]
+disabled = true
+
+[fill]
+style = "bold black"
+symbol = "."
+disabled = true
+
+[gcloud]
+format = 'on [$symbol$account(@$domain)(\($region\))]($style) '
+symbol = "☁️  "
+style = "bold blue"
+disabled = true
+detect_env_vars = []
+
+[gcloud.region_aliases]
+
+[gcloud.project_aliases]
+
+[git_branch]
+format = "[ $symbol$branch(:$remote_branch)]($style)"
+symbol = " "
+style = "yellow bold"
+only_attached = false
+always_show_remote = false
+ignore_branches = ['master', 'main']
+ignore_bare_repo = true
+disabled = false
+
+[hostname]
+ssh_only = true
+ssh_symbol = "🌐 "
+trim_at = "."
+detect_env_vars = []
+format = "[$ssh_symbol$hostname]($style) in"
+style = "green dimmed bold"
+disabled = false
+
+[hostname.aliases]
+
 [kubernetes]
-disabled  = false
-style   = 'bg:sapphire fg:crust'
+symbol = "☸ "
 format = '[$symbol$context( \($namespace\))]($style)'
+style = "teal bold"
+disabled = false
 contexts = [
-  { context_pattern = "k3d-.*", symbol = "~☸ " },
+  { context_pattern = "k3d-.*", symbol = "⏚ " },
 ]
+
+[kubernetes.context_aliases]
+
+[kubernetes.user_aliases]
+
+[memory_usage]
+threshold = 75
+format = "via $symbol[$ram( | $swap)]($style) "
+style = "white bold dimmed"
+symbol = "🐏 "
+disabled = true
+
+[sudo]
+format = "[as $symbol]($style)"
+symbol = "🧙 "
+style = "bold maroon"
+allow_windows = false
+disabled = false
+
+[time]
+disabled = false
+time_format = "%R"
+format = ' $time '
+
+[custom.git_dirty]
+detect_folders = [".git"]
+when = "git rev-parse --is-inside-work-tree 2> /dev/null"
+command = "[[ -n $(git status --porcelain) ]] && echo '✙'"
+style = "yellow bold"
+format = "([$output]($style))"
