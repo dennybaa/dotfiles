@@ -29,6 +29,8 @@
           latest.nushell
 
           # shell tools
+          latest.neovim
+          latest.vimPlugins.LazyVim
           latest.starship
           latest.antidote
           latest.fzf

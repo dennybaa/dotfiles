@@ -1,5 +1,5 @@
 #!/bin/sh
-. ~/.shell/functions
+. ~/.shell/lib
 
 # Append custom PATHS
 _dot_append_paths \
@@ -14,4 +14,4 @@ if (which podman >/dev/null 2>/dev/null); then
 fi
 
 # Exports
-export EDITOR=vim
+export EDITOR=nvim

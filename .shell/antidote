@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 # Note! antidote uses .zsh_plugins.txt file
 #
-. ~/.shell/functions
+. ~/.shell/lib
 
 _dot_define "_dot_add_colorize_progs"
 _dot_add_colorize_progs() {

@@ -72,9 +72,8 @@ disabled = false
 show_milliseconds = true
 format = "[ in $duration](pink)"
 disabled = false
-show_notifications = true
+show_notifications = false
 min_time = 10_000
-min_time_to_notify = 45_000
 
 [container]
 format = '[$symbol \[$name\]]($style) '
