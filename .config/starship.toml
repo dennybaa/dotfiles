@@ -5,7 +5,7 @@ add_newline = true
 follow_symlinks = true
 palette = 'catppuccin_frappe'
 format = """\
-${hostname}\
+(${hostname} )\
 (${sudo}${directory} [❯](blue bold) )\
 (${custom.git_dirty}${git_branch} [❯](yellow bold) )\
 ($kubernetes [❯](teal bold) )\
@@ -147,8 +147,8 @@ ssh_only = true
 ssh_symbol = "🌐 "
 trim_at = "."
 detect_env_vars = []
-format = "[$ssh_symbol$hostname]($style) in"
-style = "green dimmed bold"
+format = "[$ssh_symbol$hostname]($style)"
+style = "flamingo dimmed bold"
 disabled = false
 
 [hostname.aliases]
