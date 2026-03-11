@@ -20,4 +20,4 @@ _dot_add_colorize_progs ss
 
 # Load antidote
 . ~/.nix-profile/share/antidote/antidote.zsh
-antidote load
+antidote load ${HOME}/.zsh_plugins.txt

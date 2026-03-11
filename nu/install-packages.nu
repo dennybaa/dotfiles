@@ -64,7 +64,7 @@ export def 'main nix' [
     let profile = $profile | str replace -r '.?/?nix/' ''
     let flake_output = '.' + if ($output == 'default') {''} else {$'#($output)'}
 
-    let supported_outputs = nix flake show $"./nix/($profile)/flake.nix" --json e> $null_device
+    let supported_outputs = nix flake show $"./nix/($profile)/flake.nix" --json
         | from json | $in.packages | transpose arch outputs
         | $in.outputs | columns
 

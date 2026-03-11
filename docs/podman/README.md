@@ -4,9 +4,9 @@
 
 Though podman.service has `Delegate=true` which should delegate all available cgroup controllers.
 
-## *optional* can be skipped (The k3d documentation shows a more granular approach)
+## *Optional* delegate.conf
 
-By default, a non-root user can only get memory controller and PIDs controller to be delegated.
+Can be skipped (Delegate=yes) is usually already set. However k3d documentation suggests a more extended configuration. By default, a non-root user can only get memory controller and PIDs controller to be delegated.
 
 To run properly we need to enable CPU, CPUSET, and I/O delegation:
 
@@ -17,4 +17,12 @@ sudo tee /etc/systemd/system/user@.service.d/delegate.conf <<EOF
 Delegate=cpu cpuset io memory pids
 EOF
 sudo systemctl daemon-reload
+```
+
+## K3D
+
+To create a k3d cluster in Podman specify the feature gate:
+
+```shell
+k3d cluster create test --k3s-arg '--kubelet-arg=feature-gates=KubeletInUserNamespace=true@server:*'
 ```
