@@ -5,9 +5,13 @@ disable_backends = ["asdf"]
 fnox-env = "https://github.com/jdx/mise-env-fnox"
 
 [env]
-MISE_GITHUB_TOKEN = { value = "{{ exec(command='get-local-secret github-public-token || true') }}" }
 # _.fnox-env = { tools = true }
+MISE_GITHUB_TOKEN = { value = "{{ exec(command='get-local-secret github-public-token || true') }}" }
+KIND_EXPERIMENTAL_PROVIDER = "podman"
 
 [tools]
 fnox = "latest"
+k3d = "latest"
+kind = "latest"
+kubectl = "latest"
 zoxide = "latest"

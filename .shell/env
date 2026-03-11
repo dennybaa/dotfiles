@@ -3,8 +3,8 @@
 
 # Append custom PATHS
 _dot_append_paths \
-    "$HOME/.local/bin" \
-    "$HOME/.local/scripts"
+    "${HOME}/.local/bin" \
+    "${HOME}/.local/scripts"
 
 
 # Use Podman instead of Docker if it is available
@@ -13,5 +13,5 @@ if (which podman >/dev/null 2>/dev/null); then
     export DOCKER_SOCK=$XDG_RUNTIME_DIR/podman/podman.sock
 fi
 
-# Default editor
+# Exports
 export EDITOR=vim
