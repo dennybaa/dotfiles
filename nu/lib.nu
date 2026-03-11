@@ -54,7 +54,7 @@ export def "sudo acquire" [message] {
     # Inform of operation to be carried out
     gum style --padding="1 0 0 0" --foreground $color.default $message
     if (sudo password-required) {
-        gum print --color $color.sudo "👷 Acquiring privileges to perform action!"
+        gum print --color $color.sudo "🧙 Acquiring privileges to perform action!"
         try { ^sudo -i true } catch {|e|
             gum style --foreground $color.red 'Operation failed!'
             exit $e.exit_code
