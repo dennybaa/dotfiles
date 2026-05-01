@@ -28,12 +28,6 @@
         name = "code";
         paths = [
           # common
-          pkgs.jq
-          pkgs.yq-go
-          pkgs.just
-
-          pkgs.nodejs_24
-          pkgs.go
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];

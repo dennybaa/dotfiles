@@ -10,8 +10,13 @@ MISE_GITHUB_TOKEN = { value = "{{ exec(command='get-local-secret github-public-t
 KIND_EXPERIMENTAL_PROVIDER = "podman"
 
 [tools]
+cloudflared = "latest"
 fnox = "latest"
+jq = "latest"
+just = "latest"
 k3d = "latest"
+kcl = "latest"
 kind = "latest"
 kubectl = "latest"
+yq = "latest"
 zoxide = "latest"

@@ -26,7 +26,6 @@
           pkgs.docker-credential-helpers
           pkgs.docker-compose
           pkgs.docker-buildx
-          pkgs.kind
           pkgs.k9s
 
           # other

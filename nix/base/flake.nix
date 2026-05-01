@@ -34,6 +34,9 @@
           latest.starship
           latest.antidote
           latest.fzf
+
+          # os tools
+          latest.ptcpdump
         ];
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];
