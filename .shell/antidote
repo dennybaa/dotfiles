@@ -18,6 +18,8 @@ ZSH_COLORIZE_STYLE=stata-dark
 # Colorize additional tools
 _dot_add_colorize_progs ss
 
+# Set oh-my-zsh update to auto mode
+zstyle ':omz:update' mode auto
 # Load antidote
 . ~/.nix-profile/share/antidote/antidote.zsh
 antidote load ${HOME}/.zsh_plugins.txt

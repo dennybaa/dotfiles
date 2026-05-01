@@ -21,3 +21,4 @@ unset -v _shell _supported_shell
 
 # Aliases
 alias e="nvim"
+alias ta="tmux a"
