@@ -16,6 +16,9 @@ fi
 # Load antidote
 shell_source ~/.shell/antidote zsh
 
+# Load bash specifics
+shell_source ~/.shell/bash bash
+
 # Cleanup
 unset -v _shell _supported_shell
 
