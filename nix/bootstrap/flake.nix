@@ -16,28 +16,12 @@
         config.allowUnfree = true;
       };
 
+      # Include bundles definitions
+      bundle = import ../bundles.nix { inherit pkgs latest; };
     in {
       default = pkgs.buildEnv {
-        name = "base";
-        paths = [
-          # bootstrap required tools
-          latest.chezmoi
-          latest.stow
-          latest.delta
-          latest.gum
-          latest.mise
-          latest.nushell
-
-          # shell tools
-          latest.neovim
-          latest.vimPlugins.LazyVim
-          latest.starship
-          latest.antidote
-          latest.fzf
-
-          # os tools
-          latest.ptcpdump
-        ];
+        name = "default";
+        paths = bundle.bootstrap;
         pathsToLink = [ "/bin" "/share" ];
         extraOutputsToInstall = [ "out" "bin" ];
       };

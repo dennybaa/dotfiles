@@ -1,12 +1,12 @@
 # Workstation Setup Guide
 
-Setting up a workstation involves two main phases:
-1. **Bootstrap** – Install Nix on a Debian-based system and the base tools (populating nix/base)
+Setting up a workstation involves two phases:
+1. **Bootstrap** – Install Nix on a Debian-based system along with base tools
 2. **Provision** – Install APT/Flatpak packages and apply configurations via [mise](https://mise.jdx.dev/lang/rust.html)
 
 ## Prerequisites
 
-The setup process requires the [dennybaa/dotfiles](https://github.com/dennybaa/dotfiles) repository (you're already here). Install Git and perform the initial configuration:
+This setup requires the [dennybaa/dotfiles](https://github.com/dennybaa/dotfiles) repository. Install Git and clone the repository:
 
 ```shell
 sudo apt install git -y
@@ -14,92 +14,97 @@ sudo apt install git -y
 # Clone the repository
 cd ~ && git clone git@github.com:dennybaa/dotfiles.git
 
-# Alternative: clone via public HTTPS
+# Alternative: clone via HTTPS
 # cd ~ && git clone https://github.com/dennybaa/dotfiles.git
 ```
 
 ## Provision a Workstation
 
-The provision phase installs required software and applies system configurations. This process is orchestrated by [mise](https://mise.jdx.dev) and leverages:
+The provision phase installs software and applies system configurations. This is orchestrated by [mise](https://mise.jdx.dev) and uses:
 
-- **`nu/install-packages.nu`** – Handles package operations: updating APT sources, installing APT and Flatpak packages, and managing pre-built Nix profiles
+- **`nu/install-packages.nu`** – Handles package operations: updating APT sources, installing APT and Flatpak packages
 - **mise** – Executes configuration hooks
 
 ### Bootstrap
 
-1. Bootstrap installs Nix on your Debian-based system—the first step to using this repository.
+1. Run the bootstrap script to install Nix:
 
     ```shell
     cd ~/dotfiles && ./bootstrap.sh && . /etc/profile.d/nix.sh
     ```
 
-    Once bootstrapped, proceed with full provisioning **using mise tasks**.
-
-1. Run the necessary bootstrap tasks (post-Nix setup).
+2. Run the post-Nix bootstrap tasks:
 
     ```shell
-    mise run bootstrap
+    mise r bootstrap
     ```
 
-1. **Configure GitHub token for tools**
+3. **Configure GitHub token**
 
-   > **Why this matters**: Configuring authentication prevents GitHub API rate limiting when package managers like Nix or mise fetch sources.
+   > **Why this matters**: Prevents GitHub API rate limiting when package managers fetch sources.
 
-   **Recommended approach**: Create and use a fine-grained personal access token (PAT) for:
-   - Generate a token at: https://github.com/settings/personal-access-tokens for only public repositories
+   Create a fine-grained personal access token (PAT) at: https://github.com/settings/personal-access-tokens
 
-   **Use the `setup:github-token` task**: This will prompt you for the token input and update necessary files:
+   Then run:
+
    ```shell
-   mise run setup:github-token
+   mise r setup:github-token
    ```
 
-## Workstation Configuration
+## Configuration
 
-**Mise tasks**:
+View available mise tasks:
 
 ```shell
 mise tasks
-mise run nix:add --help # for details about the command adding packages from nix/<bundle> flakes into profile
 ```
 
-### Provision a Pre-configured System Preset
+### Provision a System Preset
 
-Choose the appropriate command based on your system type:
+Two system presets are available:
 
-- **Console system** (terminal-only):
-  ```shell
-  mise provision
-  ```
+- **minimal** – Installs a basic set of packages (zsh, tmux, etc.)
+- **desktop** – Full workstation with APT, Flatpak, and Nix packages
 
-- **Desktop system** (includes GUI applications):
-  ```shell
-  mise provision:desktop
-  ```
+Run the appropriate command:
 
-> **Note**: Use the `--update` (or `-u`) flag to refresh installed packages.
+```shell
+mise r provision:minimal
+
+# OR
+
+mise r provision:desktop
+```
+
+> **📌 NOTE:** Use `--update` (or `-u`) to refresh installed packages, including Flatpak and Nix.
 
 ## Packages
 
-System package configuration is defined in [packages.nu](packages.nu). Here's what it contains:
+System package configuration is defined in [packages.nu](packages.nu):
 
-- **`AptSources`** – Files to be placed in `/etc/apt/sources.list.d/` and optional GPG key URLs for provisioning
-- **`AptPackages`** and **`FlatpakPackages`** – Application bundles organized by type (base, desktop, etc.)
+- **`AptSources`** – Files for `/etc/apt/sources.list.d/` and optional GPG keys
+- **`AptPackages`** and **`FlatpakPackages`** – Packages organized by type (base, desktop, etc.)
 
-For example, to install both *base* and *desktop* APT package bundles:
-
-```shell
-mise packages:apt base desktop
-```
-
-> **Note**: Management of flake-based Nix profiles is intentionally not grouped under the mise `packages:nix` task.
-
-### Nix Profile Packages
-
-Nix profiles are defined in `nix/*/flake.nix` files. A Nix flake may have multiple outputs—for instance, `nix/code/flake.nix` contains `default` and `desktop` outputs.
-When installing a Nix profile, you cannot install multiple output sets simultaneously. Choose the specific output you need:
+Install specific bundles:
 
 ```shell
-mise nix -o desktop nix/code
+mise r packages:apt default desktop
 ```
 
-> **Note**: If you previously installed a different flake output for a given profile, the operation will fail.
+### Nix Profile
+
+A single profile approach is recommended: `nix/desktop`, `nix/vps`, `nix/server`, etc.
+
+Install a profile:
+
+```shell
+mise r nix desktop
+```
+
+After installing the main profile, clean up the bootstrap profile to avoid overlap:
+
+```shell
+mise r nix:rm bootstrap
+```
+
+> 📝 **Note:** Use `-u/--update` to refresh flake versions.
