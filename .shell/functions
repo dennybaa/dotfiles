@@ -6,7 +6,7 @@ k3d() {
     if [[ "$1" == "cluster" && "$2" == "create" ]]; then
         if [[ ! "$*" == *"--k3s-arg"* ]]; then
             command k3d "$@" --k3s-arg '--kubelet-arg=feature-gates=KubeletInUserNamespace=true@server:*'
-            return
+            return $?
         fi
     fi
     command k3d "$@"

@@ -27,19 +27,24 @@ _dot_shell() {
     elif [ -n "$BASH_VERSION" ]; then echo "bash"
     else echo "sh"; fi
 }
+# Set helper variable (valid during the execution context and will be unset in the end)
+_shell=$(_dot_shell)
+
 
 # Cleanup
-_dot_define "shell_cleanup"
-shell_cleanup() {
+_dot_define "unset_lib"
+unset_lib() {
     for _f in $(echo $_DOT_FUNCS); do
         unset -f "$_f"
     done
     unset _DOT_FUNCS
+    # Help to unset common _shell variable
+    unset -v _shell
 }
 
 # Source file (for ~/.shell/* scripts, can specify for which shells and whether not to clean up)
-_dot_define "shell_source"
-shell_source() {
+_dot_define "source_on"
+source_on() {
     _path="$1"; shift
     # Check if our shell matches
     case " $@ " in
@@ -49,5 +54,11 @@ shell_source() {
     unset -v _path
 }
 
-# Load our functions for full shells
-shell_source ~/.shell/functions bash zsh
+_dot_define "shell_is"
+shell_is() {
+    # Check if our current $_shell exists in the arguments passed
+    case " $@ " in
+        *" $(_dot_shell) "*) return 0 ;;
+        *) return 1 ;;
+    esac
+}

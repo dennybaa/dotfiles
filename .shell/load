@@ -1,27 +1,23 @@
 #!/bin/sh
 . ~/.shell/lib
-# Detect shell
-_shell=$(_dot_shell)
-_supported_shell=$(echo "zsh bash" | grep -qw $_shell && echo 'true' || echo 'false')
 
-# Supported shell
-if [ "$_supported_shell" = "true" ]; then
-    # Load mise-en-place (early since it may provides tools for plugins)
+# Load tools
+if shell_is bash zsh; then
     eval "$(mise activate $_shell)"
-
-    # Load starship
     eval "$(starship init $_shell)"
 fi
 
-# Load antidote
-shell_source ~/.shell/antidote zsh
+# Source tools and functions
+source_on ~/.shell/antidote zsh
+source_on ~/.shell/functions bash zsh
 
-# Load bash specifics
-shell_source ~/.shell/bash bash
+# Load bash specific configuration
+source_on ~/.shell/bash bash
 
-# Cleanup
-unset -v _shell _supported_shell
 
 # Aliases
 alias e="nvim"
 alias ta="tmux a"
+
+
+## Note!: run unset_lib in caller to clean up lib functions
