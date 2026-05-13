@@ -10,44 +10,50 @@ let LSB = {
 
 
 ## Apt sources to populate
+let _AptSources = {
+    megaio: {
+        URIs: 'https://mega.nz/linux/repo/xUbuntu_24.04/'
+        Suites: './'
+        'Signed-By': '/etc/apt/keyrings/meganz-archive-keyring.gpg'
+        _keyURL: 'https://mega.nz/keys/MEGA_signing.key'
+    }
+    warpdotdev: {
+        URIs: 'https://releases.warp.dev/linux/deb'
+        Architectures: $APT_ARCH
+        Suites: 'stable'
+        Components: 'main'
+        'Signed-By': '/etc/apt/trusted.gpg.d/warpdotdev.gpg'
+        _keyURL: 'https://releases.warp.dev/linux/keys/warp.asc'
+    }
+    zerotier: {
+        URIs: 'http://download.zerotier.com/debian/bookworm'
+        Suites: 'bookworm'
+        Components: 'main'
+        'Signed-By': '/usr/share/keyrings/zerotier-debian-package-key.gpg'
+        _keyURL: 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/contact%40zerotier.com.gpg'
+    }
+}
+
+## Bundle specific source files
 let AptSources = {
-    warpdotdev: [{
-            line: $"deb [arch=($APT_ARCH) signed-by=/etc/apt/keyrings/warpdotdev.gpg] https://releases.warp.dev/linux/deb stable main"
-            keyURL: "https://releases.warp.dev/linux/keys/warp.asc"
-    }]
-    megasync: [{
-            line: $"deb [signed-by=/usr/share/keyrings/meganz-archive-keyring.gpg] https://mega.nz/linux/repo/xUbuntu_($LSB.ShortRelease)/ ./"
-            keyURL: "https://mega.nz/keys/MEGA_signing.key"
-    }]
-    github: [{
-            line: $"deb [arch=($APT_ARCH) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
-            keyURL: "https://cli.github.com/packages/githubcli-archive-keyring.gpg"
-    }]
-    zerotier: [{
-        line: "deb [signed-by=/usr/share/keyrings/zerotier-debian-package-key.gpg] http://download.zerotier.com/debian/bookworm bookworm main"
-        keyURL: "https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/contact%40zerotier.com.gpg"
-    }]
+    default: {}
+    desktop: ($_AptSources | select ...[megaio warpdotdev zerotier])
 }
 
 ## APT packages bundles
 let AptPackages = {
-    base: [
+    default: [
         bind9-dnsutils
         tcpdump
         uidmap
         zsh
-        vim
         direnv
         htop
         atop
         tree
         lsof
         grc
-        syncthing
-        gh
         tmux
-        libsecret-1-0
-        zerotier-one
     ]
     desktop: [
         warp-terminal
@@ -55,11 +61,15 @@ let AptPackages = {
         syncthing-gtk
         transmission-gtk
         remmina
+        libsecret-1-0
+        syncthing
+        zerotier-one
     ]
 }
 
 ## Flatpak packages bundles
 let FlatpakPackages = {
+    default: {}
     desktop: [
         org.gimp.GIMP
         org.telegram.desktop

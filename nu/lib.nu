@@ -78,49 +78,31 @@ export def "write gpg-key" [
     return false
 }
 
-# Add source items (passed as input) into a source file.
-# Returns true if source items have been added.
+# Create/update a .source file in /etc/apt/sources.list.d,
+# also assist to write a gpg key when _keyURL is provided.
 export def "apt add-sources" [
-    name: string # apt file name
-]: list<record<line:string>> -> bool {
-    let input = $in
-    let path = $'/etc/apt/sources.list.d/($name).list'
+    file_name: string
+    source: record
+]: nothing -> bool {
+    let path = $'/etc/apt/sources.list.d/($file_name).sources'
+    let hiddenKeys = $source | columns | where {|c| $c | str starts-with '_'}
     mut rs = false
-    mut updated: list<record<line: string>> = []
 
-    $input | if ($path | path exists) {
-        let content = $path | open | lines # existing content
-        # build an update (consists of lines to add into source file)
-        for i in $input {
-            $content
-            | where $it == $i.line
-            | if ($in | is-empty) { $updated = $updated | append $i } # no matches found, source file must be updated
+    # Current and the new computed value
+    let current = try { open $path | from yaml } catch { {} }
+    let update = $current | merge {Types: 'deb', ...($source | reject ...$hiddenKeys)}
+
+    # Helper to write a gpg key from _keyURL
+    $source._keyURL | if ($in | is-not-empty) {
+        if (write gpg-key --keyURL=$in $update."Signed-By") {
+            $rs = true
         }
-    } else { $updated = $in }
-
-    # Write lines updates (or new ones) into a source file
-    if ($updated | is-not-empty) {
-        # We don't rollback since we update (revert can be proceeded manually) if needed
-        # Join and sudo tee the update
-        $updated.line | str join "\n" | $"($in)\n" 
-            | do {
-                sudo tee --append=true -m $'Adding deb sources...' $path
-            }
-
-        gum print --color=$color.green $"✅ Added ($path)"
-        $rs = true
     }
 
-    # Write a gpg file if needed
-    for i in $input {
-        let keyURL = $i | get -o keyURL
-        $i.line | parse -r '.*?signed-by=(?P<keypath>[^\s\]]+).*' |
-            if ($in | is-not-empty) and ($keyURL | is-not-empty) {
-                write gpg-key --keyURL=($i | get -o keyURL) ($in.keypath | first)
-                    | if ($in) { $rs = true }
-            }
-    }
-    return $rs
+    if $current == $update { return $rs }
+    # Update a .sources file
+    $update | to yaml | sudo tee -m $"Writing ($file_name).sources ..." $path
+    return true
 }
 
 export def "sudo apt-update" [] {

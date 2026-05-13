@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+#MISE description="Add or update nix flake system package profile"
+#USAGE arg "<profile>"         help="Specifies the system type (eg: desktop, see nix/*)"
+#USAGE flag "-u --update"      help="Specify to update flake, which effectivly will refresh versions."
+set -e
+
+# Check if profile exists
+if nix profile list --json | jq -e --arg profile "nix/${usage_profile}" '.elements | has($profile)' > /dev/null; then
+    if [ "$usage_update" == "true" ]; then
+        nix flake update --flake ./nix/${usage_profile}
+    fi
+    nix profile upgrade nix/${usage_profile}
+else
+    # Adding fresh
+    cd ./nix/${usage_profile} && nix profile add
+fi

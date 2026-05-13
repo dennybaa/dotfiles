@@ -2,75 +2,55 @@
 description = "Provision System packages (Apt, Flatpak)"
 usage = '''
 flag "-u --update"          help="Update packages"
-arg "[bundle]" var=#true    help="Specifies which software bundles to provision" default="base"
+arg "[bundle]" var=#true    help="Specifies which software bundles to install" default="default"
 '''
 run = 'exec mise run --jobs=1 packages:?* ${usage_update:+--update} ${usage_bundle}'
 
+
 [tasks."packages:apt"]
-description = "Provision Apt packages"
+description = "Provision Apt package bundles"
 usage = '''
 flag "-u --update"          help="Update packages"
-arg "[bundle]" var=#true    help="Specifies which software bundles to provision" default="base"
+arg "[bundle]" var=#true    help="Specifies which software bundles to install"
 '''
 run = './nu/install-packages.nu apt ${usage_update:+--update} ${usage_bundle}'
+
 
 [tasks."packages:flatpak"]
 description = "Provision Flatpak packages"
 usage = '''
 flag "-u --update"          help="Update packages"
-arg "[bundle]" var=#true    help="Specifies which software bundles to provision" default="base"
+arg "[bundle]" var=#true    help="Specifies which software bundles to provision" default="default"
 '''
 run = './nu/install-packages.nu flatpak ${usage_update:+--update} ${usage_bundle}'
 
-[tasks."nix:profiles:ls"]
-description = "List installed nix profiles"
-run="nix profile list"
 
-[tasks."nix:profiles"]
-description = "List nix profiles"
-run="ls -1 nix/*/flake.nix | sed 's@/flake.nix@@'"
-
-[tasks."nix:add"]
-description = "Provision (add/update) Nix flake packages profile"
-usage='''
-arg "profile"                                   help="Specify which nix profile to (profiles under nix/*)"
-flag "-u --update"                              help="Update nix profile (forces update even if flake.nix changes are not tracked)"
-flag "-o --output <output>" default="default"   help="Specify flake package output (see the corresponding flake.nix aka desktop/cloud etc)"
-'''
-run='./nu/install-packages.nu nix ${usage_update:+--update} --output=${usage_output} ${usage_profile}'
+[tasks."nix:rm"]
+description = "Remove nix profile"
+usage='arg "profile"               help="Specifies profile to remove"'
+run = 'nix profile remove nix/{{ usage.profile }}'
 
 
-[tasks.provision]
-description = "Provision default workstation"
-usage = '''
-flag "-u --update"          help="Update packages"
-'''
+[tasks."nix:cleanup"]
+description = "Run nix-collect-garbage"
+run = 'nix-collect-garbage'
+
+
+[tasks."provision:minimal"]
+description = "Provision minimal system"
+usage = 'flag "-u --update" help="Enforce update of installed software"'
 raw = true
-run = [
-    'exec mise run --jobs=1 packages:?* ${usage_update:+--update} base',
-    'exec mise run nix:add ${usage_update:+--update} base',
-    'exec mise run nix:add ${usage_update:+--update} code',
-    'exec mise run nix:add ${usage_update:+--update} --output=cloud devops',
-]
-# Setup tasks
-depends_post = [
-    "setup:podman"
-]
+run = 'exec mise run --raw --jobs=1 packages:?* ${usage_update:+--update} defaut'
 
 
 [tasks."provision:desktop"]
-description = "Provision default workstation"
-usage = '''
-flag "-u --update"          help="Update packages"
-'''
+description = "Provision minimal system"
+usage = 'flag "-u --update" help="Enforce update of installed software"'
 raw = true
 run = [
-    'exec mise run --raw --jobs=1 packages:?* ${usage_update:+--update} base desktop',
-    'exec mise run --raw nix:add ${usage_update:+--update} base',
-    'exec mise run --raw nix:add ${usage_update:+--update} --output=desktop code',
-    'exec mise run --raw nix:add ${usage_update:+--update} --output=cloud devops',
+    'exec mise run --raw --jobs=1 packages:?* ${usage_update:+--update} default desktop',
+    'exec mise run nix ${usage_update:+--update} desktop',
 ]
-# Setup tasks
 depends_post = [
     "setup:podman",
     "setup:keepassxc"
@@ -81,13 +61,16 @@ depends_post = [
 description = "Runs necessary tasks for the bootstrap stage"
 depends = ["stow:adopt"]
 
+
 [tasks."stow"]
 description = "Stow directory structure"
 run = "stow -v --no-folding ."
 
+
 [tasks."stow:clean"]
 description = "Unstow directory structure"
 run = "stow -v --no-folding ."
+
 
 [tasks."stow:adopt"]
 description = "Stow adopt - adopts changes and stashes them (result is restored)"
@@ -97,6 +80,7 @@ run = [
     "stow -v --no-folding --adopt . && git stash push -m 'post stow --adopt changes'",
     "git restore ."
 ]
+
 
 [tasks."setup:podman"]
 description = "Setup podman"

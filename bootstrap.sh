@@ -2,7 +2,7 @@
 set -e
 
 bootstrapped=""
-if (! sudo -n true &> /dev/null); then
+if ! sudo -n true &> /dev/null; then
     echo "Acquiring sudo privileges..."
     sudo -i true
 fi
@@ -23,16 +23,19 @@ fi
 
 # Load nix profile paths and add nix/base profile
 . /etc/profile.d/nix.sh
-if ( ! nix profile list | grep -wq 'nix/base' ); then
-    echo "Installing nix/base profile..."
-    (cd nix/base && nix profile install .)
+if ! nix profile list | grep -wq 'nix/bootstrap'; then
+    echo "Adding nix/bootstrap profile..."
+    # lower priority in comparison to other profiles
+    cd nix/bootstrap && nix profile add . --priority 6
+    cd - >/dev/null
+
     nix profile list
     bootstrapped=y
 fi
 
 # Fix nix provided zshrc to be included (zsh uses /etc/zsh/zshrc instead /etc/zshrc )
-if ( zsh -ixc : 2>&1 | grep -q 'etc/zsh/' ) && [ -f /etc/zshrc ]; then
-    if ! ( grep -q '^\. \/etc\/zshrc' /etc/zsh/zshrc ); then
+if zsh -ixc : 2>&1 | grep -q 'etc/zsh/' && [ -f /etc/zshrc ]; then
+    if ! grep -q '^\. \/etc\/zshrc' /etc/zsh/zshrc; then
         echo -e "\n# Compat include\n. /etc/zshrc\n# Compat include Ends" | sudo tee -a /etc/zsh/zshrc >/dev/null
     fi
 fi
