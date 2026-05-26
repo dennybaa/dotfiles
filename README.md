@@ -30,26 +30,30 @@ The provision phase installs software and applies system configurations. This is
 1. Run the bootstrap script to install Nix:
 
     ```shell
-    cd ~/dotfiles && ./bootstrap.sh && . /etc/profile.d/nix.sh
+    cd ~/dotfiles && ./bootstrap.sh
     ```
+
+    > **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To continue setup in this case, running the command below is **required**:
+    > ```shell
+    > . /etc/profile.d/nix.sh
+    > ```
 
 2. Run the post-Nix bootstrap tasks:
 
     ```shell
-    mise r bootstrap
+    mise run bootstrap
     ```
 
-3. **Configure GitHub token**
-
-   > **Why this matters**: Prevents GitHub API rate limiting when package managers fetch sources.
-
-   Create a fine-grained personal access token (PAT) at: https://github.com/settings/personal-access-tokens
-
-   Then run:
-
-   ```shell
-   mise r setup:github-token
-   ```
+    > **📝 Note:** The bootstrap process may prompt for local secret values, like the example below:
+    >
+    > ```
+    > Enter your GitHub Personal Access Token (for public repositories, CTRL+D to submit)
+    > >>>
+    > ```
+    >
+    > **`GitHub Personal Access Token for public repositories`**
+    > : Used by Nix and Mise to authenticate API requests when downloading from GitHub (increases rate limits and avoids anonymous access restrictions).
+    
 
 ## Configuration
 
@@ -69,18 +73,19 @@ Two system presets are available:
 Run the appropriate command:
 
 ```shell
-mise r provision:minimal
-
+mise run provision:minimal
 # OR
+mise run provision:desktop
 
-mise r provision:desktop
+# Additionally
+mise run 'setup:desktop:*'
 ```
 
-> **📌 NOTE:** Use `--update` (or `-u`) to refresh installed packages, including Flatpak and Nix.
+> **📝 NOTE:** Use `--update` (or `-u`) to refresh installed packages, including Flatpak and Nix.
 
 ## Packages
 
-System package configuration is defined in [packages.nu](packages.nu):
+System package configuration is defined in [nu/packages.nu](nu/packages.nu):
 
 - **`AptSources`** – Files for `/etc/apt/sources.list.d/` and optional GPG keys
 - **`AptPackages`** and **`FlatpakPackages`** – Packages organized by type (base, desktop, etc.)
@@ -98,13 +103,13 @@ A single profile approach is recommended: `nix/desktop`, `nix/vps`, `nix/server`
 Install a profile:
 
 ```shell
-mise r nix desktop
+mise run nix desktop
 ```
 
-After installing the main profile, clean up the bootstrap profile to avoid overlap:
+After installing the main profile, clean up the bootstrap profile to avoid overlap (recommended, but not necessary):
 
 ```shell
-mise r nix:rm bootstrap
+mise run nix:rm bootstrap
 ```
 
 > 📝 **Note:** Use `-u/--update` to refresh flake versions.

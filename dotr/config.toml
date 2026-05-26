@@ -1,0 +1,25 @@
+banner = false
+
+[packages.mise]
+dependencies = []
+dest = "~/.config/mise"
+post_actions = ["chmod 600 ~/.config/mise/github_tokens.toml"]
+src = "mise"
+
+[packages.nix]
+dependencies = []
+dest = "~/.config"
+post_actions = [
+    "chmod 600 ~/.config/nix/nix.conf",
+    "systemctl --user daemon-reexec",
+]
+src = "nix"
+
+[profiles.default]
+dependencies = [
+    "nix",
+    "mise",
+]
+
+[prompts]
+GITHUB_USER_TOKEN_PUBLIC = "Enter your GitHub Personal Access Token (for public repositories, CTRL+D to submit)"

@@ -1,0 +1,5 @@
+{# vim: set ft=tera ts=4 sw=4 sts=4 et:  #}
+{% if GITHUB_USER_TOKEN_PUBLIC != "" -%}
+[tokens."github.com"]
+token = "{{ GITHUB_USER_TOKEN_PUBLIC}}"
+{% endif %}

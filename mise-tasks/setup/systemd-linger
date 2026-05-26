@@ -1,0 +1,30 @@
+#!/usr/bin/env nu
+#MISE description="Enable systemd lingering"
+#MISE hide=true
+#USAGE arg "[user]"             help="Specifies the user to enable systemd lingering (default: $USER)" 
+#USAGE flag "-d --disable"      help="Disable linger"
+use dotlib/lib.nu 'sudo acquire'
+
+let action = if (($env | get -o 'usage_disable') == null) { 'create' } else { 'delete' }
+let user = $env | get -o 'usage_user' | default $env.USER
+let lingering = (loginctl show-user $user | find 'Linger=' | ansi strip | str trim | str replace 'Linger=' '') | first
+
+let actions = {
+    create: {
+        if ($lingering == "yes") { return }
+        sudo acquire -p $"Enable linger for user: ($user)" {
+            ^sudo loginctl enable-linger $user
+        }
+    }
+    delete: {
+        if ($lingering == 'no') { return }
+        sudo acquire -p $"Disable linger for user: ($user)" {
+            ^sudo loginctl disable-linger $user
+        }
+    }
+}
+
+# Run
+if ($action in $actions) {
+    do ($actions | get $action)
+}

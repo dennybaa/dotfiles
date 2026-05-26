@@ -1,0 +1,51 @@
+#!/usr/bin/env nu
+#MISE description="Helper to run a task or a group of tasks"
+#MISE raw_args=true
+
+use std/log
+$env.NU_LOG_FORMAT = "%ANSI_START%%LEVEL%: %MSG%%ANSI_STOP%"
+
+
+def 'mise ls' []: nothing -> list<string> {
+    do -i { ^mise tasks ls --local --name-only --hidden | complete }
+        |
+        if $in.exit_code != 0 {
+            log error $in.stderr; exit $in.exit_code
+        } else {
+            $in.stdout | lines
+        }
+}
+
+# Run a task or a group of tasks (helper)
+#
+# Example usage:
+#   glob -p stow '[podman, default]'
+#     - Effectively runs stow:podman or stow:podman:* (if it's a group of tasks) and default or default:*.
+#       In any case it won't be failing or trying to execute missing tasks.
+#
+#   glob -p group '[sub:specific, sub]'
+#     - Will execute group:sub:specific and group:sub:* (specific will appear twice, but it will be deduplicated)
+def main [
+    --prefix (-p): string         # Task prefix to run (eg: prefix:sub)
+    tasks: string                 # Specific tasks to execute ([podman:*, default-bundle])
+] {
+    if ($prefix | is-empty) {
+        log error "Prefix is required!"
+        print -en (help main | to text); exit 1
+    }
+
+    # List all mise tasks
+    let mise_tasks = mise ls
+
+    # Locate by prefix and make unique
+    let plan = ($tasks | from nuon | each {|task|
+            $mise_tasks | where {|i| $i | str starts-with $"($prefix):($task)" }
+        } | flatten | uniq
+    )
+
+    # Execute all tasks in plan
+    $plan | each {|task|
+        try { ^mise run $task; 0 } catch { 1 }
+    } 
+        | if ($in | any {|i| $i == 1}) { exit 1 }
+}
