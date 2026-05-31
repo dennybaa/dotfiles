@@ -1,0 +1,35 @@
+#!/usr/bin/env nu
+#MISE description="Podman setup delegate.conf"
+#MISE hide=true
+use dotlib/lib.nu *
+
+const DelegateFile = '/etc/systemd/system/user@.service.d/delegate.conf'
+const DelegateService = r#'[Service]
+Delegate=cpu cpuset io memory pids
+'#
+
+# action stow/unstow
+let action = $env | get -o "hookAction" | default "create"
+
+let actions = {
+    create: {
+        if ($DelegateFile | path exists) { return }
+        sudo acquire -p $"Creating ($DelegateFile) =>" {
+            ^sudo mkdir -p ($DelegateFile | path dirname)
+            $DelegateService | ^sudo tee /etc/systemd/system/user@.service.d/delegate.conf; print ""
+            ^sudo systemctl daemon-reload
+        }
+    }
+    delete: {
+        if not ($DelegateFile | path exists) { return }
+        sudo acquire -p $"Removing ($DelegateFile)." {
+            ^sudo rm -f $DelegateFile
+            ^sudo systemctl daemon-reload
+        }
+    }
+}
+
+## Run
+if $action in $actions {
+    do ($actions | get $action)
+}

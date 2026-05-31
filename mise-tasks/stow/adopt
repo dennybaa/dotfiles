@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#MISE description="Run stow adopt and revert, presrving changes in a patch file"
+#USAGE flag "-m --message <message>" help="Message used for stashed changes and the patch"
+#USAGE arg "<packages>" var=#true help="Stow packages to adopt"
+
+set -eo pipefail
+message="${usage_message:-stow adopt}"
+
+# Stash any work in the directory and restore back
+git stash push -u -m "${message}"; git stash apply stash@{0}
+
+# Adopt might mangle the content, thus we need to preserve this changes
+filename="$(echo ${message} | sed 's/ /_/')-$(date +'%s')".patch
+stow --no-folding --adopt -d stow -v -t ~ ${usage_packages}
+
+# Grab changes and restore
+git diff 'stash@{0}' > "${filename}"
+if [ ! -s "${filename}" ]; then
+    rm -f $filename
+else
+    gum style --foreground=214 --padding='1 0' "Stowing bootstrap, ignoring adopted changes... Orignal diff is in ${filename}."
+    cat "${filename}" | delta --diff-highlight --side-by-side
+    git apply -R "${filename}"
+fi

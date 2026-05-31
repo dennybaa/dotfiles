@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#MISE description="Configure Polkit rules for systemd-resolved without sudo at runtime"
+#MISE hide=true
+#USAGE arg "[user]" help="Target system user for the Polkit rule (default: $USER)"
+set -euo pipefail
+
+TARGET_USER="${usage_username:-$USER}"
+
+echo "Configuring DNS Polkit permissions for target user: ${TARGET_USER}"
+RULE_FILE="/etc/polkit-1/rules.d/10-${TARGET_USER}-resolved-dns.rules"
+TMP_FILE=$(mktemp)
+trap 'rm -f "$TMP_FILE"' EXIT
+
+# Generate the Polkit rule text using a heredoc
+cat << EOF > "$TMP_FILE"
+polkit.addRule(function(action, subject) {
+    if ((action.id == "org.freedesktop.resolve1.set-dns-servers" ||
+         action.id == "org.freedesktop.resolve1.set-domains") &&
+        subject.user == "${TARGET_USER}") {
+        return polkit.Result.YES;
+    }
+});
+EOF
+
+# Deploy the configuration to the system-protected folder
+echo "Writing configuration to ${RULE_FILE} (requires sudo)..."
+sudo mv "$TMP_FILE" "$RULE_FILE"
+sudo chmod 644 "$RULE_FILE"
+sudo chown root:root "$RULE_FILE"
+sudo killall -HUP polkitd
+echo "✅ Polkit rule successfully installed for user '${TARGET_USER}'!"

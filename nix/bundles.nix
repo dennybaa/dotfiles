@@ -3,21 +3,20 @@
 
   # Bootstrap tools - minimal set of tools to start using scripts and mise tasks.
   bootstrap = [
-    latest.chezmoi
     latest.stow
     latest.delta
     latest.gum
     latest.mise
     latest.nushell
-    latest.jq
   ];
 
   shellTools = [
-    latest.neovim
     latest.starship
     latest.antidote
     latest.fzf
-    latest.vimPlugins.LazyVim
+    pkgs.neovim
+    pkgs.tree-sitter
+    pkgs.vimPlugins.LazyVim
   ];
 
   netUtils = [
@@ -31,6 +30,13 @@
     pkgs.docker-credential-helpers
     pkgs.docker-compose
     pkgs.docker-buildx
+  ];
+
+  virt = [
+    pkgs.virt-manager
+    pkgs.passt
+    pkgs.libvirt
+    pkgs.virtiofsd
   ];
 
   kubernetes = [

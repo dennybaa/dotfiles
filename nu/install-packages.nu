@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
-use lib.nu *
+use dotlib/lib.nu *
 use std/util null_device
-source ../packages.nu
+source ./packages.nu
 
 
 # Install packages
@@ -19,7 +19,7 @@ def 'main flatpak' [
     let bundles = $FlatpakPackages | select -o ...[$bundle, ...$extra]
     for e in ($bundles | items {|k, v| {bundle: $k, pkgs: $v}}) {
         if ($e.pkgs | is-not-empty) {
-            lib gum print --padding="1 0 0 0" $'Installing Flatpak bundle ($e.bundle)...'
+            gum print --padding="1 0 0 0" $'Installing Flatpak bundle ($e.bundle)...'
                 ^flatpak install ...$update -y ...$e.pkgs
         }
    }
@@ -32,7 +32,7 @@ def 'main apt add-sources' [
 ]: nothing -> bool {
     mut updated = false
     for i in ($sources | transpose file_name source) {
-        $updated = lib apt add-sources $i.file_name $i.source
+        $updated = apt add-sources $i.file_name $i.source
     }
     return $updated
 }
@@ -49,17 +49,25 @@ def 'main apt' [
     # Add sources for all processed bundels
     let bundles = [$bundle, ...$extra]
     for b in $bundles {
-        $AptSources | get $b | main apt add-sources $in |
-            if ($in) { $aptUpdate = true }
+        let sources = $AptSources | get -o $b
+        if ($sources == null) {
+            gum print $'Bundle "($b)" is not found check ./packages.nu, skipping sources...'
+            continue
+        }
+        main apt add-sources $sources | if ($in) { $aptUpdate = true }
     }
 
     # Refresh apt sources
-    if ($update or $aptUpdate) { lib sudo apt-update }
+    if $update or $aptUpdate { sudo acquire -p "Updating apt sources..." { ^sudo apt-get update } }
 
     for b in $bundles {
-        $AptPackages | get $b | if ($in | is-not-empty) {
-            lib sudo acquire $'Installing Apt bundle ($b)...'
-            ^sudo apt-get install -y ...$in
+        let packages = $AptPackages | get -o $b
+        if ($packages == null) {
+            gum print $'Bundle "($b)" is not found check ./packages.nu, skipping packages...'
+            continue
+        }
+        sudo acquire -p $'Installing Apt bundle ($b)...' {
+            ^sudo apt-get install -y ...$packages
         }
     }
 }

@@ -1,0 +1,23 @@
+#!/bin/sh
+. ~/.shell/lib
+
+# Load tools
+if shell_is bash zsh; then
+    safe_eval mise activate $_shell
+    safe_eval starship init $_shell
+    safe_eval wt config shell init $_shell
+fi
+
+# Source tools and functions
+source_on ~/.shell/antidote zsh
+source_on ~/.shell/functions bash zsh
+
+# Load bash specific configuration
+source_on ~/.shell/bash bash
+
+
+# Aliases
+alias ta="tmux a"
+
+
+## Note!: run unset_lib in caller to clean up lib functions

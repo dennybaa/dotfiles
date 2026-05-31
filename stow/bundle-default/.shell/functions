@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Functions, this file is loaded for bash/zsh
+
+_shell=$(_dot_shell)
+
+# Add k3d
+if command -v k3d 2>/dev/null 1>&2; then
+    k3d() {
+        if [[ "$1" == "cluster" && "$2" == "create" ]]; then
+            if [[ ! "$*" == *"--k3s-arg"* ]]; then
+                command k3d "$@" --k3s-arg '--kubelet-arg=feature-gates=KubeletInUserNamespace=true@server:*'
+                return $?
+            fi
+        fi
+        command k3d "$@"
+    }
+fi
+
+# Add nvim command
+if command -v nvim 2>/dev/null 1>&2; then
+    export EDITOR=$(command -v nvim)
+    ed() {
+        $EDITOR "${@:-.}"
+    }
+fi
+
+# Add podman-user-generator wrapper, patches direct /nix/store links.
+if command -v podman 2>&1 | grep -q '\.nix-profile'; then
+    podman-user-generator() {
+        local outdir="${@: -1}" snapshot_ts file
+        if [ -d "$outdir" ] && [[ ! " $* " == *" -dryrun "*  ]]; then
+            # we need to proccess inline, so track updated files
+            snapshot_ts=$(date +%s.%N)
+            command $HOME/.nix-profile/lib/systemd/user-generators/podman-user-generator "$@"
+            find $outdir -maxdepth 1 -type f -newermt "@$snapshot_ts" -print0 | while IFS= read -r -d '' file; do
+                sed -i $file -Ee 's@/nix/store/[^/]+/bin/@/usr/bin/env @' 
+            done
+        elif [[ ! -d "$outdir" ]] && [[ " $* " == *" -dryrun "*  ]]; then
+            command $HOME/.nix-profile/lib/systemd/user-generators/podman-user-generator "$@" \
+                | sed -Ee 's@/nix/store/[^/]+/bin/@/usr/bin/env @'
+        else
+            command $HOME/.nix-profile/lib/systemd/user-generators/podman-user-generator "$@"
+        fi
+    }
+fi
+
+# unset
+unset -v _shell

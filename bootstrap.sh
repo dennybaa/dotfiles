@@ -7,11 +7,10 @@ if ! sudo -n true &> /dev/null; then
     sudo -i true
 fi
 
-
-# install nix
+# Install Nix
 if [ ! -e /etc/profile.d/nix.sh ]; then
     echo "Bootstrapping nix..."
-    sudo apt update && sudo apt install -y git sed wget curl
+    sudo apt update && sudo apt install -y git sed wget curl zsh
     curl -L https://nixos.org/nix/install | sh -s -- --daemon
 
     # enable flakes
@@ -20,6 +19,12 @@ if [ ! -e /etc/profile.d/nix.sh ]; then
     bootstrapped=y
 fi
 
+# Fix nix provided /etc/zshrc (while the correct one /etc/zsh/zshrc), so source /etc/zshrc
+if zsh -ixc : 2>&1 | grep -q 'etc/zsh/' && [ -f /etc/zshrc ]; then
+    if ! grep -q '^\. \/etc\/zshrc' /etc/zsh/zshrc; then
+        echo -e "\n# Compat include\n. /etc/zshrc\n# Compat include Ends" | sudo tee -a /etc/zsh/zshrc >/dev/null
+    fi
+fi
 
 # Load nix profile paths and add nix/base profile
 . /etc/profile.d/nix.sh
@@ -33,7 +38,7 @@ if ! nix profile list | grep -wq 'nix/bootstrap'; then
     bootstrapped=y
 fi
 
-# Fix nix provided zshrc to be included (zsh uses /etc/zsh/zshrc instead /etc/zshrc )
+# Fix nix provided /etc/zshrc (while the correct one /etc/zsh/zshrc), so source /etc/zshrc
 if zsh -ixc : 2>&1 | grep -q 'etc/zsh/' && [ -f /etc/zshrc ]; then
     if ! grep -q '^\. \/etc\/zshrc' /etc/zsh/zshrc; then
         echo -e "\n# Compat include\n. /etc/zshrc\n# Compat include Ends" | sudo tee -a /etc/zsh/zshrc >/dev/null

@@ -19,9 +19,6 @@
       # Include bundles definitions
       bundle = import ../bundles.nix { inherit pkgs latest; };
 
-      # Fonts config
-      fontsConf = pkgs.makeFontsConf { fontDirectories = bundle.desktopFonts; };
-
     in {
       default = pkgs.symlinkJoin {
         name = "default";
@@ -29,20 +26,9 @@
         ++ bundle.shellTools
         ++ bundle.netUtils
         ++ bundle.podman
-        ++ bundle.kubernetes
-        ++ bundle.desktopCode
-        ++ bundle.desktopFonts
-        ++ bundle.virt
         ;
 
         nativeBuildInputs = [ pkgs.makeWrapper ];
-
-        # Specify the fontconfig
-        postBuild = ''
-          rm $out/bin/code
-          makeWrapper ${latest.vscode}/bin/code $out/bin/code \
-            --set FONTCONFIG_FILE "${fontsConf}"
-        '';
       };
     };
   };

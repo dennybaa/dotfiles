@@ -1,0 +1,8 @@
+#!/bin/sh
+#MISE hide=true
+
+xdg-mime default com.brave.Browser.desktop x-scheme-handler http
+xdg-mime default com.brave.Browser.desktop x-scheme-handler https
+xdg-mime default com.brave.Browser.desktop text/html
+xdg-settings set default-web-browser com.brave.Browser.desktop
+systemctl --user restart xdg-desktop-portal.service

@@ -1,10 +1,24 @@
+[settings]
+experimental = true
+
+[tools]
+"github:uroybd/DotR" = { version = "1.0.3" }
+
+[tasks.bootstrap]
+description = "Bootstrap necessary configuration"
+depends = "stow:adopt -m bootstrap bundle-default nushell-scripts"
+depends_post = [
+    { task = "dotr", args=["--profile", "default"] }
+]
+
 [tasks.packages]
 description = "Provision System packages (Apt, Flatpak)"
 usage = '''
 flag "-u --update"          help="Update packages"
 arg "[bundle]" var=#true    help="Specifies which software bundles to install" default="default"
 '''
-run = 'exec mise run --jobs=1 packages:?* ${usage_update:+--update} ${usage_bundle}'
+interactive = true
+run = 'mise run -j 1 --raw packages:?* ${usage_update:+--update} ${usage_bundle}'
 
 
 [tasks."packages:apt"]
@@ -24,71 +38,62 @@ arg "[bundle]" var=#true    help="Specifies which software bundles to provision"
 '''
 run = './nu/install-packages.nu flatpak ${usage_update:+--update} ${usage_bundle}'
 
-
 [tasks."nix:rm"]
 description = "Remove nix profile"
 usage='arg "profile"               help="Specifies profile to remove"'
 run = 'nix profile remove nix/{{ usage.profile }}'
 
-
 [tasks."nix:cleanup"]
 description = "Run nix-collect-garbage"
 run = 'nix-collect-garbage'
 
-
 [tasks."provision:minimal"]
 description = "Provision minimal system"
 usage = 'flag "-u --update" help="Enforce update of installed software"'
-raw = true
-run = 'exec mise run --raw --jobs=1 packages:?* ${usage_update:+--update} defaut'
-
+interactive = true
+run = [
+    'mise run -j 1 --raw packages:?* ${usage_update:+--update} default',
+    'mise run nix ${usage_update:+--update} minimal',
+    'mise run stow podman bundle-default',
+    'mise run --raw setup:systemd-linger',
+]
 
 [tasks."provision:desktop"]
 description = "Provision minimal system"
 usage = 'flag "-u --update" help="Enforce update of installed software"'
-raw = true
+interactive = true
 run = [
-    'exec mise run --raw --jobs=1 packages:?* ${usage_update:+--update} default desktop',
-    'exec mise run nix ${usage_update:+--update} desktop',
-]
-depends_post = [
-    "setup:podman",
-    "setup:keepassxc"
+    'mise run -j 1 --raw packages:?* ${usage_update:+--update} default desktop',
+    'mise run nix ${usage_update:+--update} desktop',
+    'mise run stow podman bundle-default bundle-desktop',
+    'mise run --raw setup:systemd-linger',
 ]
 
-
-[tasks.bootstrap]
-description = "Runs necessary tasks for the bootstrap stage"
-depends = ["stow:adopt"]
-
-
-[tasks."stow"]
-description = "Stow directory structure"
-run = "stow -v --no-folding ."
-
-
-[tasks."stow:clean"]
-description = "Unstow directory structure"
-run = "stow -v --no-folding ."
-
-
-[tasks."stow:adopt"]
-description = "Stow adopt - adopts changes and stashes them (result is restored)"
-run = [
-    # Enforce ~/dotfiles git version rather than adopted during bootstrap (differs from default stow behaviour)
-    # Basically we recreate links for .bashrc, .profile etc and stash adopted diff (moved by stow into ~/dotfiles).
-    "stow -v --no-folding --adopt . && git stash push -m 'post stow --adopt changes'",
-    "git restore ."
-]
-
-
-[tasks."setup:podman"]
-description = "Setup podman"
+[tasks.stow]
+description = "Stow dotfiles packages"
 usage = '''
-flag "-c --cleanup"          help="Cleanup"
+arg "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podman etc)" var=#true
 '''
-raw = true
-run = [
-    'exec mise run setup:stow-nix-user-systemd ${usage_cleanup:+--cleanup} podman',
-    'exec mise run setup:podman-delegate ${usage_cleanup:+--cleanup}'
+run = 'stow --no-folding -d stow -v -t ~ ${usage_packages}'
+depends_post = [
+    # Invoke tasks for each package: mise-tasks/<prefix>/<package>
+    { task = "glob", args=["--prefix", "stow", "{{usage.packages}}"] }
 ]
+
+[tasks."stow:delete"]
+description = "Unstow dotfiles packages"
+usage = '''
+arg  "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podman etc)" var=#true
+'''
+run = 'stow -D --no-folding -d stow -v -t ~ ${usage_packages}'
+depends = [
+    { task = "glob", env = {hookAction = "delete"}, args=["--prefix", "stow", "{{usage.packages}}"] }
+]
+
+[tasks.dotr]
+description = "Run DotR deploy tasks (with templating)"
+dir = '{{ config_root }}/dotr'
+usage = '''
+flag "--profile -P <profile>" help="Profile to use"
+'''
+run = 'dotr deploy --clean false -P ${usage_profile}'

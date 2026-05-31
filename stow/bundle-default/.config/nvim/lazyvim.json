@@ -1,0 +1,14 @@
+{
+  "extras": [
+    "lazyvim.plugins.extras.lang.markdown",
+    "lazyvim.plugins.extras.lang.nix",
+    "lazyvim.plugins.extras.lang.nushell",
+    "lazyvim.plugins.extras.lang.toml",
+    "lazyvim.plugins.extras.util.gitui"
+  ],
+  "install_version": 8,
+  "news": {
+    "NEWS.md": "11866"
+  },
+  "version": 8
+}

@@ -1,0 +1,26 @@
+#!/usr/bin/env nu
+#MISE description="Enbale podman user systemd units"
+#MISE hide=true
+
+# Use dotfiles libs (stow/nushell-scripts/.config/nushell/scripts/dotlib)
+use dotlib systemd
+use dotlib/lib.nu 'sudo acquire'
+
+# User units to enable (if not already enabled)
+const enabled = [
+    "podman-auto-update.timer"
+    "podman.socket"
+    "podman-start.service" # custom service (provided by dotfiles)
+]
+
+## Actions to perform for stow and unstow 
+let action = $env | get -o "hookAction" | default "create"
+let actions = {
+    create: { systemd enable units $enabled }
+    delete: { systemd disable units $enabled }
+}
+
+## Run
+if $action in $actions {
+    do ($actions | get $action)
+}

@@ -1,0 +1,15 @@
+[settings]
+disable_backends = ["asdf"]
+env_shell_expand = true
+
+[env]
+MISE_ENV_CACHE = true
+
+[tools]
+fnox = "latest"
+jq = "latest"
+qdns = "latest"
+yq = "latest"
+zoxide = "latest"
+"github:suzuki-shunsuke/ghtkn" = { version = "0.2.4" }
+worktrunk = "latest"
