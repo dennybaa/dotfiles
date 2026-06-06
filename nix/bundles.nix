@@ -14,6 +14,7 @@
     latest.starship
     latest.antidote
     latest.fzf
+    pkgs.jq
     pkgs.neovim
     pkgs.tree-sitter
     pkgs.vimPlugins.LazyVim
@@ -42,6 +43,9 @@
   kubernetes = [
     pkgs.k9s
     pkgs.sops
+  ];
+
+  desktop = [
   ];
 
   desktopCode = [

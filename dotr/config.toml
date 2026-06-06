@@ -9,16 +9,20 @@ src = "mise"
 [packages.nix]
 dependencies = []
 dest = "~/.config"
-post_actions = [
-    "chmod 600 ~/.config/nix/nix.conf",
-    "systemctl --user daemon-reexec",
-]
+post_actions = ["chmod 600 ~/.config/nix/nix.conf"]
 src = "nix"
+
+[packages.systemd]
+dependencies = []
+dest = "~/.config/systemd"
+post_actions = ["systemctl --user daemon-reexec"]
+src = "systemd"
 
 [profiles.default]
 dependencies = [
     "nix",
     "mise",
+    "systemd",
 ]
 
 [prompts]

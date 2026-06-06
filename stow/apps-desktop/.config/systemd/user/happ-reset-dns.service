@@ -1,0 +1,17 @@
+[Unit]
+Description=Reset DNS on Happ interface
+After=happ.service coredns.service
+Requires=coredns.service
+PartOf=happ.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=300s
+Environment="IFACE=tun0"
+ExecStartPre=%h/.local/scripts/wait-for-dns.sh
+ExecStart=resolvectl dns $IFACE ""
+Restart=on-abnormal
+RemainAfterExit=yes
+
+[Install]
+WantedBy=happ.service

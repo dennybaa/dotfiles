@@ -1,6 +1,11 @@
 #!/bin/sh
 . ~/.shell/lib
 
+# Source nix profile on any shell
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
 # Load tools
 if shell_is bash zsh; then
     safe_eval mise activate $_shell
