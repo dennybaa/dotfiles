@@ -1,0 +1,13 @@
+[Unit]
+Description=Happ
+After=wayland-ready.target
+# (start the target automatically when the service is enabled)
+Requires=wayland-ready.target
+
+[Service]
+ExecStart=/usr/bin/happ
+Restart=no
+
+[Install]
+# start automatically when the target is reached
+WantedBy=wayland-ready.target

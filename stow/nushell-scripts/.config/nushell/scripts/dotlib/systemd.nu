@@ -1,5 +1,7 @@
 # systemd (systemctl --user) helper utilities
 #
+use dotlib/lib.nu [ 'gum print', 'gum fail', 'color' ]
+
 
 # List user unit files
 export def "list unit-files" [
@@ -62,12 +64,11 @@ export def "enable units" [
 
     # Try to enable units, but fail in case of errors (eg. a missing unit file)
     let output = try {
+        gum print "Enabling systemd user units:"
+        gum print -p '0 0 1 2' -c $color.white ($enable.unit | str join "\n")
         ^systemctl --user enable ...($enable.unit) | complete
 
-    } catch { |e|
-        ## TODO: RED COLOR
-        print -e $e.raw; exit $e.exit_code       
-    }
+    } catch { |e| gum fail -e $e.exit_code $e.raw }
 
     # Recreate symlinks in case we see that the source has been dereferenced to /nix/store
     for link in ($output.stderr | parse --regex 'Created symlink (?<dst>.+) → (?<src>.+)\.') {
@@ -85,6 +86,8 @@ export def "disable units" [
 ] {
     let disable = list unit-files -s enabled | where {|i| $i.unit in $units }
     if ($disable | length) == 0 { return }
+    gum print "Disabling systemd user units:"
+    gum print -p '0 0 1 2' -c $color.white ($disable.unit | str join "\n")
     ^systemctl --user disable ...($disable.unit)
     ^systemctl --user daemon-reload
 }

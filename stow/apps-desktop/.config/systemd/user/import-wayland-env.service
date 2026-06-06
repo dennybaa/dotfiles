@@ -1,0 +1,11 @@
+[Unit]
+Description=Import User environemnt into systemd manager
+Before=wayland-ready.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/scripts/wayland-env cosmic-comp
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=wayland-ready.target

@@ -30,6 +30,7 @@
         ++ bundle.netUtils
         ++ bundle.podman
         ++ bundle.kubernetes
+        ++ bundle.desktop
         ++ bundle.desktopCode
         ++ bundle.desktopFonts
         ++ bundle.virt

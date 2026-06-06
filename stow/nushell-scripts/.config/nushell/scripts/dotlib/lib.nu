@@ -21,12 +21,23 @@ export def git_root [] {
 # Run gum style to print a line
 export def "gum print" [
     message: string
-    --color=$color.lightBlue    # Specify color (default: light blue)
+    --color (-c) =$color.lightBlue    # Specify color (default: light blue)
     --padding (-p)="0 0"        # Specify padding
     --no-newline (-n)           # Omit newline if -n is provided
+    --stderr (-e)               # Print to stderr
 ] {
     ^gum style --padding $padding --foreground $color $message |
-        | str trim -rc "\n" | if $no_newline { print -n } else { print }
+        | str trim -rc "\n" | print --stderr=$stderr --no-newline=$no_newline
+}
+
+# Print fail message and exit
+export def "gum fail" [
+    --exit-code (-e)=1      # Exit code
+    --padding (-p)="0 0"    # Specify padding
+    message: string         # Fail message to stderr (colored red)
+] {
+    gum print --padding=$padding -e -c $color.red $message
+    exit $exit_code
 }
 
 # Check if sudo password is required to be acquired

@@ -1,0 +1,7 @@
+[Unit]
+Description=Wayland environment is available
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Install]
+WantedBy=graphical-session.target

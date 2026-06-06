@@ -1,0 +1,28 @@
+#!/usr/bin/env nu
+#MISE description="Enable/disable systemd user units"
+#MISE raw_args=true
+
+# Use dotfiles libs (stow/nushell-scripts/.config/nushell/scripts/dotlib)
+use dotlib systemd
+use dotlib/lib.nu [ 'sudo acquire', 'gum print', 'gum fail', 'color' ]
+
+# Environment to detect 'create', 'delete' action, default: 'create'
+const ActionVariable = 'hookAction'
+
+# Actions to perform
+let Actions = {
+    create: {|enabled| systemd enable units $enabled }
+    delete: {|enabled| systemd disable units $enabled }
+}
+
+# Enable/disable systemd user units
+# Environment variable hookAction="delete" switches operation to disable mode.
+def main [
+    ...enable: string # List of units to enable/disable
+] {
+    if ($enable | is-empty) { gum print --color=$color.red -p '0 0 1 0' "Provide enable parameter!"; help main | print -e; exit 1; }
+    let action = ($env | get -o $ActionVariable | default "create"
+      | if ($in in $Actions) { $in } else { gum fail --exit-code=2 $"Unknown action: ($in)!" }
+    )
+    do ($Actions | get $action) ($enable | split row ' ' | flatten)
+}

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Script to disable the first internal display (eDP-) if more than one display is enabled
+set -eo pipefail
+
+# Skip if it's not a cosmic desktop
+if ! command -v cosmic-randr >/dev/null 2>&1; then exit 0; fi
+
+# Wait for the display to settle
+sleep 10
+
+# Check if the internal display (eDP-1) is enabled and if there are more than one display enabled
+if cosmic-randr list --kdl | grep 'enabled=#true' | grep -vq eDP-1; then
+  # Force on and off to fix the issue with the display backlit
+  cosmic-randr enable eDP-1 && cosmic-randr disable eDP-1
+fi

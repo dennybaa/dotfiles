@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Script to import user's graphical session environment variables
+set -e
+COMPOSITOR="${1:-$COMPOSITOR}"
+: ${COMPOSITOR:?must be provided, or run $0 <compositor-app> }
+
+# get compositor pid and binary path (includes user's profile)
+_pid=$(pgrep -of $COMPOSITOR); _env=$(cat /proc/$_pid/environ | tr '\0' '\n' | grep -E '^(PATH|DBUS_SESSION_BUS_ADDRESS|XDG_RUNTIME_DIR)')
+_xwayland_pid=$(pgrep -P $_pid)
+eval "$_env"
+: "${XDG_RUNTIME_DIR:?is empty}"; : "${DBUS_SESSION_BUS_ADDRESS:?is empty}"
+
+# grab first socket file
+_display_socket=$(ls -1 "${XDG_RUNTIME_DIR}/wayland-"? | head -n 1)
+[ -S "$_display_socket" ] || { >&2 echo "Could not locate wayland socket: ${_display_socket}"; exit 1; }
+WAYLAND_DISPLAY="${_display_socket#$XDG_RUNTIME_DIR}"
+WAYLAND_DISPLAY="${WAYLAND_DISPLAY##/}"
+DISPLAY=$(ps -p $_xwayland_pid -o args= | cut -d' ' -f2)
+
+export PATH DBUS_SESSION_BUS_ADDRESS DISPLAY WAYLAND_DISPLAY XDG_RUNTIME_DIR
+exec systemctl --user import-environment PATH DBUS_SESSION_BUS_ADDRESS ${DISPLAY:+DISPLAY} WAYLAND_DISPLAY XDG_RUNTIME_DIR

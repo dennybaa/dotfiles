@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=Cosmic disable eDP-1
+Exec=sh -c "~/.local/scripts/cosmic-disable-display"
+Terminal=false
+Type=Application
