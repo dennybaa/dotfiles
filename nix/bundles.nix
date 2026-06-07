@@ -13,10 +13,14 @@
   shellTools = [
     latest.starship
     latest.antidote
-    latest.fzf
-    pkgs.jq
+    #
     pkgs.neovim
+    pkgs.fzf
+    pkgs.ripgrep
+    pkgs.fd
+    pkgs.jq
     pkgs.tree-sitter
+    pkgs.gcc
     pkgs.vimPlugins.LazyVim
   ];
 
