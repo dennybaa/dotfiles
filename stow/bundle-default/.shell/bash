@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-safe_eval zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} bash

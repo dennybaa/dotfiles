@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim: set filetype=bash:
 . ~/.shell/lib
 
 # Source nix profile on any shell
@@ -6,20 +7,30 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# Load tools
+# Eaarly load for bash+zsh tools
 if shell_is bash zsh; then
-    safe_eval mise activate $_shell
-    safe_eval starship init $_shell
-    safe_eval wt config shell init $_shell
+  safe_eval mise activate $_shell
+  safe_eval starship init $_shell
+  safe_eval wt config shell init $_shell
 fi
+
+# Non-uniform setup
+case "$_shell" in
+bash)
+  safe_eval zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} bash
+  safe_eval fzf --bash
+  ;;
+esac
 
 # Source tools and functions
 source_on ~/.shell/antidote zsh
 source_on ~/.shell/functions bash zsh
 
-# Load bash specific configuration
-source_on ~/.shell/bash bash
-
+# Late load tools
+if shell_is bash zsh; then
+  # source_cmd usage g completion-init "$_shell"
+  :
+fi
 
 # Aliases
 alias ta="tmux a"

@@ -1,3 +1,5 @@
+# install the compint wrapper
+mattmc3/ez-compinit
 
 # oh-my-zsh
 getantidote/use-omz
@@ -9,6 +11,7 @@ ohmyzsh/ohmyzsh path:plugins/kubectl
 ohmyzsh/ohmyzsh path:plugins/magic-enter
 ohmyzsh/ohmyzsh path:plugins/zoxide
 ohmyzsh/ohmyzsh path:plugins/tmux
+ohmyzsh/ohmyzsh path:plugins/fzf
 
 # from github
 unixorn/warhol.plugin.zsh

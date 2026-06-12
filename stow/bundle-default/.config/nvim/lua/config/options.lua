@@ -6,6 +6,5 @@
 
 local opt = vim.opt
 
--- OSC 52 is disabled for ssh sessions by default, enable it
---opt.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus" -- Sync with system clipboard
-opt.clipboard = "unnamedplus" -- Sync with system clipboard
+-- Disable clipboard for ssh sessions to enable OSC52 (+y) to work
+opt.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus"

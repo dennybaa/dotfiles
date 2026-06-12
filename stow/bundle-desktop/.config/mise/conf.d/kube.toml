@@ -1,0 +1,3 @@
+[tools]
+omnictl = "latest"
+talosctl = "latest"

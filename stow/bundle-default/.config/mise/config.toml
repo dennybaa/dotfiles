@@ -13,3 +13,5 @@ yq = "latest"
 zoxide = "latest"
 "github:suzuki-shunsuke/ghtkn" = { version = "0.2.4" }
 worktrunk = "latest"
+ripgrep = "latest"
+caddy = "latest"

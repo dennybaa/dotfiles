@@ -1,73 +1,86 @@
 #!/bin/sh
 # Don't load twice
-if ( type _dot_define >/dev/null 2>/dev/null ); then return; fi
+if (type _dot_define >/dev/null 2>/dev/null); then return; fi
 _DOT_FUNCS="_dot_define"
 
 # Internal helper to track functions
 _dot_define() {
-    _DOT_FUNCS="$_DOT_FUNCS $1"
+  _DOT_FUNCS="$_DOT_FUNCS $1"
 }
 
 # Append to PATH (High Performance)
 _dot_define "_dot_append_paths"
 _dot_append_paths() {
-    for _p in "$@"; do
-        [ -d "$_p" ] || continue
-        case ":$PATH:" in
-            *":$_p:"*) ;; # Already there
-            *) export PATH="$PATH:$_p" ;;
-        esac
-    done
+  for _p in "$@"; do
+    [ -d "$_p" ] || continue
+    case ":$PATH:" in
+    *":$_p:"*) ;; # Already there
+    *) export PATH="$PATH:$_p" ;;
+    esac
+  done
 }
 
 # Detect Shell
 _dot_define "_dot_shell"
 _dot_shell() {
-    if [ -n "$ZSH_VERSION" ]; then echo "zsh"
-    elif [ -n "$BASH_VERSION" ]; then echo "bash"
-    else echo "sh"; fi
+  if [ -n "$ZSH_VERSION" ]; then
+    echo "zsh"
+  elif [ -n "$BASH_VERSION" ]; then
+    echo "bash"
+  else echo "sh"; fi
 }
 # Set helper variable (valid during the execution context and will be unset in the end)
 _shell=$(_dot_shell)
 
-
 # Cleanup
 _dot_define "unset_lib"
 unset_lib() {
-    for _f in $(echo $_DOT_FUNCS); do
-        unset -f "$_f"
-    done
-    unset _DOT_FUNCS
-    # Help to unset common _shell variable
-    unset -v _shell
+  for _f in $(echo $_DOT_FUNCS); do
+    unset -f "$_f"
+  done
+  unset _DOT_FUNCS
+  # Help to unset common _shell variable
+  unset -v _shell
 }
 
 # Source file (for ~/.shell/* scripts, can specify for which shells and whether not to clean up)
 _dot_define "source_on"
 source_on() {
-    _path="$1"; shift
-    # Check if our shell matches
-    case " $@ " in
-        *" $(_dot_shell) "*) . $_path;;
-        "  ") . $_path;; # any shell
-    esac
-    unset -v _path
+  _path="$1"
+  shift
+  # Check if our shell matches
+  case " $@ " in
+  *" $(_dot_shell) "*) . $_path ;;
+  "  ") . $_path ;; # any shell
+  esac
+  unset -v _path
 }
 
+# Eval safely only if the command exists in path (command -v check)
 _dot_define "safe_eval"
 safe_eval() {
-    _cmd="$1"; shift
-    if command -v "$_cmd" >/dev/null 2>&1; then
-        eval "$("$_cmd" "$@")"
-    fi
-    unset -v _cmd
+  _cmd="$1"
+  shift
+  if command -v "$_cmd" >/dev/null 2>&1; then
+    eval "$("$_cmd" "$@")"
+  fi
+  unset -v _cmd
+}
+
+# Source a command ouput if it exists
+_dot_define "source_cmd"
+source_cmd() {
+  _cmd="$1"; shift
+  if command -v "$_cmd" >/dev/null 2>&1; then
+    source <($_cmd "$@")
+  fi
 }
 
 _dot_define "shell_is"
 shell_is() {
-    # Check if our current $_shell exists in the arguments passed
-    case " $@ " in
-        *" $(_dot_shell) "*) return 0 ;;
-        *) return 1 ;;
-    esac
+  # Check if our current $_shell exists in the arguments passed
+  case " $@ " in
+  *" $(_dot_shell) "*) return 0 ;;
+  *) return 1 ;;
+  esac
 }
