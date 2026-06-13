@@ -1,5 +1,7 @@
 #!/bin/sh
 # Don't load twice
+# POSIX-Complient lib functions to support profile load in various shells including sh/dash
+
 if (type _dot_define >/dev/null 2>/dev/null); then return; fi
 _DOT_FUNCS="_dot_define"
 
@@ -67,12 +69,14 @@ safe_eval() {
   unset -v _cmd
 }
 
-# Source a command ouput if it exists
+# Source a command ouput if it exists (posix-complient)
 _dot_define "source_cmd"
 source_cmd() {
   _cmd="$1"; shift
   if command -v "$_cmd" >/dev/null 2>&1; then
-    source <($_cmd "$@")
+    eval ". /dev/stdin" <<EOF
+$("$_cmd" "$@")
+EOF
   fi
 }
 
