@@ -72,7 +72,8 @@ safe_eval() {
 # Source a command ouput if it exists (posix-complient)
 _dot_define "source_cmd"
 source_cmd() {
-  _cmd="$1"; shift
+  _cmd="$1"
+  shift
   if command -v "$_cmd" >/dev/null 2>&1; then
     eval ". /dev/stdin" <<EOF
 $("$_cmd" "$@")

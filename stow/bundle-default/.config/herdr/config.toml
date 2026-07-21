@@ -1,0 +1,13 @@
+onboarding = false
+[theme]
+# Built-in themes: catppuccin, terminal, tokyo-night, dracula, nord,
+#                  gruvbox, one-dark, solarized, kanagawa, rose-pine,
+#                  vesper
+name = "tokyo-night"
+
+[keys]
+prefix = "ctrl+a"
+
+[ui]
+agent_panel_sort = "spaces"
+sidebar_collapsed_mode = "compact"

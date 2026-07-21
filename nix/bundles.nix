@@ -1,4 +1,5 @@
 # Common shell tools for flakes
+# Use: latest for unstable, pkgs for the latest stable release
 { pkgs, latest }: {
 
   # Bootstrap tools - minimal set of tools to start using scripts and mise tasks.
@@ -13,6 +14,7 @@
   shellTools = [
     latest.starship
     latest.antidote
+    latest.herdr
     #
     pkgs.neovim
     pkgs.fzf
@@ -22,6 +24,17 @@
     pkgs.tree-sitter
     pkgs.gcc
     pkgs.vimPlugins.LazyVim
+  ];
+
+  coding = [
+    pkgs.lazygit
+  ];
+
+  codingDesktop = [
+    # nix
+    pkgs.nixfmt
+    pkgs.nixd
+    pkgs.statix
   ];
 
   netUtils = [
@@ -52,8 +65,11 @@
   desktop = [
   ];
 
+  desktopNixGL = [
+    pkgs.ghostty
+  ];
+
   desktopCode = [
-    latest.nixd
     latest.vscode
   ];
 

@@ -34,6 +34,7 @@ fi
 
 # Aliases
 alias ta="tmux a"
+alias her="herdr"
 
 
 ## Note!: run unset_lib in caller to clean up lib functions
