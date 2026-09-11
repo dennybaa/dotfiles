@@ -33,10 +33,10 @@ def main [
     }
 
     # List all mise tasks
-    let mise_tasks = mise ls
+    let mise_tasks = (mise ls)
 
     # Locate by prefix and make unique
-    let plan = ($tasks | from nuon | each {|task|
+    let plan = ($tasks | each {|task|
             $mise_tasks | where {|i| $i | str starts-with $"($prefix):($task)" }
         } | flatten | uniq
     )
