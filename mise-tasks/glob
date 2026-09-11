@@ -7,13 +7,11 @@ $env.NU_LOG_FORMAT = "%ANSI_START%%LEVEL%: %MSG%%ANSI_STOP%"
 
 
 def 'mise ls' []: nothing -> list<string> {
-    do -i { ^mise tasks ls --local --name-only --hidden | complete }
-        |
-        if $in.exit_code != 0 {
-            log error $in.stderr; exit $in.exit_code
-        } else {
-            $in.stdout | lines
-        }
+    let res = (^mise tasks ls --local --hidden --json | complete)
+    if $res.exit_code != 0 {
+      log error $res.stderr; exit $res.exit_code
+    }
+    $res.stdout | from json | get name
 }
 
 # Run a task or a group of tasks (helper)
