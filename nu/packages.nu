@@ -12,14 +12,6 @@ let _AptSources = {
         'Signed-By': '/etc/apt/keyrings/meganz-archive-keyring.gpg'
         _keyURL: 'https://mega.nz/keys/MEGA_signing.key'
     }
-    warpdotdev: {
-        URIs: 'https://releases.warp.dev/linux/deb'
-        Architectures: $os.arch
-        Suites: 'stable'
-        Components: 'main'
-        'Signed-By': '/etc/apt/trusted.gpg.d/warpdotdev.gpg'
-        _keyURL: 'https://releases.warp.dev/linux/keys/warp.asc'
-    }
     zerotier: {
         URIs: 'http://download.zerotier.com/debian/bookworm'
         Suites: 'bookworm'
@@ -32,7 +24,7 @@ let _AptSources = {
 ## Bundle specific source files
 let AptSources = {
     default: {}
-    desktop: ($_AptSources | select ...[megaio warpdotdev zerotier])
+    desktop: ($_AptSources | select ...[megaio zerotier])
 }
 
 ## APT packages bundles
@@ -51,11 +43,9 @@ let AptPackages = {
         tmux
     ]
     desktop: [
-        warp-terminal
         megasync
         syncthing-gtk
         transmission-gtk
-        remmina
         libsecret-1-0
         syncthing
         zerotier-one
@@ -71,7 +61,6 @@ let FlatpakPackages = {
         com.slack.Slack
         us.zoom.Zoom
         com.brave.Browser
-        com.rustdesk.RustDesk
         org.keepassxc.KeePassXC
     ]
 }
