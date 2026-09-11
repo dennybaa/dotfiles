@@ -10,7 +10,7 @@ fi
 # Install Nix
 if [ ! -e /etc/profile.d/nix.sh ]; then
     echo "Bootstrapping nix..."
-    sudo apt update && sudo apt install -y git sed wget curl zsh
+    sudo apt update && sudo apt install -y git sed wget curl zsh xz-utils
     curl -L https://nixos.org/nix/install | sh -s -- --daemon
 
     # enable flakes
