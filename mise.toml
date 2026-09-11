@@ -6,10 +6,8 @@ experimental = true
 
 [tasks.bootstrap]
 description = "Bootstrap necessary configuration"
-depends = "stow:adopt -m bootstrap bundle-default nushell-scripts"
-depends_post = [
-    { task = "dotr", args=["--profile", "default"] }
-]
+depends = [{ task = "stow", args = ["bundle-default", "nushell-scripts"] }]
+depends_post = [{ task = "dotr", args = ["--profile", "default"] }]
 
 [tasks.packages]
 description = "Provision System packages (Apt, Flatpak)"
@@ -40,7 +38,7 @@ run = './nu/install-packages.nu flatpak ${usage_update:+--update} ${usage_bundle
 
 [tasks."nix:rm"]
 description = "Remove nix profile"
-usage='arg "profile"               help="Specifies profile to remove"'
+usage = 'arg "profile"               help="Specifies profile to remove"'
 run = 'nix profile remove nix/{{ usage.profile }}'
 
 [tasks."nix:cleanup"]
@@ -52,10 +50,10 @@ description = "Provision minimal system"
 usage = 'flag "-u --update" help="Enforce update of installed software"'
 interactive = true
 run = [
-    'mise run -j 1 --raw packages:?* ${usage_update:+--update} default',
-    'mise run nix ${usage_update:+--update} minimal',
-    'mise run stow podman bundle-default',
-    # 'mise run --raw setup:systemd-linger',
+  'mise run -j 1 --raw packages:?* ${usage_update:+--update} default',
+  'mise run nix ${usage_update:+--update} minimal',
+  'mise run stow podman bundle-default',
+  # 'mise run --raw setup:systemd-linger',
 ]
 
 [tasks."provision:desktop"]
@@ -63,10 +61,10 @@ description = "Provision minimal system"
 usage = 'flag "-u --update" help="Enforce update of installed software"'
 interactive = true
 run = [
-    'mise run -j 1 --raw packages:?* ${usage_update:+--update} default desktop',
-    'mise run nix ${usage_update:+--update} desktop',
-    'mise run stow podman bundle-default bundle-desktop',
-    # 'mise run --raw setup:systemd-linger',
+  'mise run -j 1 --raw packages:?* ${usage_update:+--update} default desktop',
+  'mise run nix ${usage_update:+--update} desktop',
+  'mise run stow podman bundle-default bundle-desktop',
+  # 'mise run --raw setup:systemd-linger',
 ]
 
 [tasks.stow]
@@ -76,8 +74,8 @@ arg "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podma
 '''
 run = 'stow --no-folding -d stow -v -t ~ ${usage_packages}'
 depends_post = [
-    # Invoke tasks for each package: mise-tasks/<prefix>/<package>
-    { task = "glob", args=["--prefix", "stow", "{{usage.packages}}"] }
+  # Invoke tasks for each package: mise-tasks/<prefix>/<package>
+  { task = "glob", args = ["--prefix", "stow", "{{usage.packages}}"] },
 ]
 
 [tasks."stow:delete"]
@@ -87,7 +85,11 @@ arg  "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podm
 '''
 run = 'stow -D --no-folding -d stow -v -t ~ ${usage_packages}'
 depends = [
-    { task = "glob", env = {hookAction = "delete"}, args=["--prefix", "stow", "{{usage.packages}}"] }
+  { task = "glob", env = { hookAction = "delete" }, args = [
+    "--prefix",
+    "stow",
+    "{{usage.packages}}",
+  ] },
 ]
 
 [tasks.dotr]

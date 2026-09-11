@@ -9,6 +9,7 @@
     latest.gum
     latest.mise
     latest.nushell
+    pkgs.jq
   ];
 
   shellTools = [
