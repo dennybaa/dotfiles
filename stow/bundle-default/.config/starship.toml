@@ -157,9 +157,7 @@ symbol = "☸ "
 format = '[$symbol$context( \($namespace\))]($style)'
 style = "teal bold"
 disabled = false
-contexts = [
-  { context_pattern = "k3d-.*", symbol = "⏚ " },
-]
+contexts = [{ context_pattern = "k3d-.*", symbol = "⏚ " }]
 
 [kubernetes.context_aliases]
 

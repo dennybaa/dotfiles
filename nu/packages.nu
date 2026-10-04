@@ -58,7 +58,7 @@ let FlatpakPackages = {
     desktop: [
         org.gimp.GIMP
         org.telegram.desktop
-        com.slack.Slack
+        # com.slack.Slack
         us.zoom.Zoom
         com.brave.Browser
         org.keepassxc.KeePassXC
