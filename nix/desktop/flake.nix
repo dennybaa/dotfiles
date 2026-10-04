@@ -78,6 +78,7 @@
             };
 
           desktopNixGL = builtins.map wrapWithNixGL bundle.desktopNixGL;
+          hasVscode = builtins.elem latest.vscode bundle.codingDesktop;
         in
         {
           default = pkgs.symlinkJoin {
@@ -88,18 +89,17 @@
               ++ bundle.netUtils
               ++ bundle.podman
               ++ bundle.kubernetes
+              ++ bundle.desktop
+              ++ bundle.desktopFonts
               ++ bundle.coding
               ++ bundle.codingDesktop
-              ++ bundle.desktop
-              ++ bundle.desktopCode
-              ++ bundle.desktopFonts
               ++ bundle.virt
               ++ desktopNixGL;
 
             nativeBuildInputs = [ pkgs.makeWrapper ];
 
-            # Specify the fontconfig
-            postBuild = ''
+            postBuild = pkgs.lib.optionalString hasVscode ''
+              # Specify fontConfig if latest.vscode is bundled in codingDesktop
               rm $out/bin/code
               makeWrapper ${latest.vscode}/bin/code $out/bin/code \
                 --set FONTCONFIG_FILE "${fontsConf}"

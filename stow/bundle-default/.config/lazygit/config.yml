@@ -1,0 +1,26 @@
+gui:
+  showIcons: true
+  showFileTree: false
+  theme:
+    activeBorderColor:
+      - '#7aa2f7'
+      - bold
+    inactiveBorderColor:
+      - '#414868'
+    searchingActiveBorderColor:
+      - '#ff9e64'
+      - bold
+    optionsTextColor:
+      - '#7aa2f7'
+    selectedLineBgColor:
+      - '#2e3c64'
+    selectedRangeBgColor:
+      - '#2e3c64'
+    cherryPickedCommitBgColor:
+      - '#b4f9f8'
+    cherryPickedCommitFgColor:
+      - '#7aa2f7'
+    unstagedChangesColor:
+      - '#f7768e'
+    defaultFgColor:
+      - '#c0caf5'

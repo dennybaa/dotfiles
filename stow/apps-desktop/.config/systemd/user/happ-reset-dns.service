@@ -1,5 +1,5 @@
 [Unit]
-Description=Reset DNS on Happ interface
+Description=Reset Happ DNS on sing-box tun0
 After=happ.service coredns.service
 Requires=coredns.service
 PartOf=happ.service
@@ -8,8 +8,8 @@ PartOf=happ.service
 Type=oneshot
 TimeoutStartSec=300s
 Environment="IFACE=tun0"
-ExecStartPre=%h/.local/scripts/wait-for-dns.sh
-ExecStart=resolvectl dns $IFACE ""
+ExecStartPre=%h/.local/scripts/reset-singbox-dns.sh
+ExecStart=/usr/bin/true
 Restart=on-abnormal
 RemainAfterExit=yes
 
