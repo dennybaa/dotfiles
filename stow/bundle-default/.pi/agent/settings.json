@@ -25,7 +25,8 @@
         "+extensions/index.ts"
       ]
     },
-    "npm:@dietrichgebert/ponytail"
+    "npm:@dietrichgebert/ponytail",
+    "npm:pi-memory"
   ],
   "theme": "tokyonight-moon",
   "defaultThinkingLevel": "low",

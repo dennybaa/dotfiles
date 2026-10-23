@@ -2,5 +2,4 @@
 type = "gopass"
 
 [secrets]
-GITHUB_USER_TOKEN_PUBLIC = { provider = "gopass", value = "test/test" }
-#GITHUB_USER_TOKEN_PUBLIC = { provider = "gopass", value = "github/public-api-token" }
+GITHUB_USER_TOKEN_PUBLIC = { provider = "gopass", value = "github/public-api-token" }

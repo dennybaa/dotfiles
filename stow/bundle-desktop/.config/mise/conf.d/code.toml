@@ -1,6 +1,7 @@
 [tools]
-go = "latest"
-node = "latest"
+go = "1.26"
+node = "24"
+"npm:@tobilu/qmd" = "latest"
 rust = "latest"
 usage = "latest"
 "cargo:raine/workmux" = "latest"
