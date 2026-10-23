@@ -1,0 +1,9 @@
+[[mgr.prepend_keymap]]
+on = ["z", "z"]
+run = "plugin fzf"
+desc = "Jump default (to a file)"
+
+[[mgr.prepend_keymap]]
+on = ["z", "d"]
+run = "plugin fd-fzf hidden_nogit"
+desc = "Jump to directory (hidden)"

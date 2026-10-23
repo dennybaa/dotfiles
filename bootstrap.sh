@@ -38,6 +38,18 @@ if ! nix profile list | grep -wq 'nix/bootstrap'; then
     bootstrapped=y
 fi
 
+# Install mise into ~/.local/bin (deliberately not from the nix profile)
+if [ ! -x "$HOME/.local/bin/mise" ]; then
+    curl -fsSL https://mise.run | sh
+fi
+
+# Seed the machine-local mise config (never stowed, never versioned)
+mise_local="$HOME/.config/mise/config.local.toml"
+if [ ! -e "$mise_local" ]; then
+    mkdir -p "$(dirname "$mise_local")"
+    printf '# machine-local packages (not versioned, not stowed)\n[bootstrap.packages]\n' > "$mise_local"
+fi
+
 # Fix nix provided /etc/zshrc (while the correct one /etc/zsh/zshrc), so source /etc/zshrc
 if zsh -ixc : 2>&1 | grep -q 'etc/zsh/' && [ -f /etc/zshrc ]; then
     if ! grep -q '^\. \/etc\/zshrc' /etc/zsh/zshrc; then

@@ -24,3 +24,28 @@ gui:
       - '#f7768e'
     defaultFgColor:
       - '#c0caf5'
+
+git:
+  commit:
+    signOff: true
+
+  diffRenderers:
+    - colorarg: always
+      command: delta --paging=never
+
+keybinding:
+  universal:
+    confirmInEditor: [<alt+enter>, <ctrl+s>]
+
+customCommands:
+  - key: 'V'
+    context: 'global'
+    description: 'Toggle Delta side-by-side view'
+    command: |
+      current=$(git config --global delta.side-by-side)
+      if [ "$current" = "true" ]; then
+        git config --global delta.side-by-side false
+      else
+        git config --global delta.side-by-side true
+      fi
+    loadingText: 'Toggling diff view...'

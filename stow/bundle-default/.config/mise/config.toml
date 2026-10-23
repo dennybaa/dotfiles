@@ -7,11 +7,29 @@ MISE_ENV_CACHE = true
 
 [tools]
 fnox = "latest"
-jq = "latest"
 qdns = "latest"
-yq = "latest"
-zoxide = "latest"
 "github:suzuki-shunsuke/ghtkn" = { version = "0.2.4" }
-worktrunk = "latest"
-ripgrep = "latest"
 caddy = "latest"
+usage = "latest"
+worktrunk = "latest"
+atuin = "latest"
+"github:clevercloud/mdr" = "latest"
+gopass = "latest"
+age = "latest"
+"github:chawyehsu/pinentry-wukong" = "latest"
+
+[bootstrap.packages]
+"apt:bind9-dnsutils" = "latest"
+"apt:tcpdump" = "latest"
+"apt:uidmap" = "latest"
+"apt:zsh" = "latest"
+"apt:direnv" = "latest"
+"apt:htop" = "latest"
+"apt:atop" = "latest"
+"apt:tree" = "latest"
+"apt:lsof" = "latest"
+"apt:grc" = "latest"
+"apt:tmux" = "latest"
+
+[history.reload]
+"~/.config/systemd/user.conf" = "systemctl --user daemon-reexec"

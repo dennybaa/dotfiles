@@ -1,0 +1,2 @@
+[tokens."github.com"]
+token = "{{ secret(name="github_token") }}"

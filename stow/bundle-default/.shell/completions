@@ -1,0 +1,5 @@
+#!/bin/sh
+# vim: set filetype=bash:
+# Safely source completions (if command exits) for tools
+
+source_cmd gopass completion $_shell

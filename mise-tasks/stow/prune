@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#MISE description="Remove dangling symlinks that point into stow/ (asks before removing)"
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+
+find "$HOME" -xtype l -lname "*$(basename "$PWD")/stow/*" 2>/dev/null |
+  tee "$tmp" | sed "s|^$HOME|~|" || true
+
+count=$(wc -l <"$tmp")
+if [ "$count" -eq 0 ]; then
+  echo "No dangling stow links."
+  exit 0
+fi
+
+gum confirm --default=false "Remove these $count dangling links (and directories left empty)?" || exit 0
+xargs -d '\n' -r rm -- <"$tmp"
+# rmdir only removes empty dirs; stop above the top-level dirs under $HOME
+while IFS= read -r path; do
+    dir=$(dirname "$path")
+    while [ "$dir" != "$HOME" ] && [ "$(dirname "$dir")" != "$HOME" ] && rmdir -- "$dir" 2>/dev/null; do
+        echo "removed empty dir: ${dir/#"$HOME"/\~}"
+        dir=$(dirname "$dir")
+    done
+done <"$tmp"
+echo "Removed $count dangling links."

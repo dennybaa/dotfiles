@@ -1,0 +1,25 @@
+[bootstrap.apt.sources.megaio]
+uris = "https://mega.nz/linux/repo/xUbuntu_24.04/"
+suites = "./"
+key = "https://mega.nz/keys/MEGA_signing.key"
+fingerprint = "B01C811880480C854C73EC7E1A664B787094A482"
+
+[bootstrap.apt.sources.zerotier]
+uris = "http://download.zerotier.com/debian/bookworm"
+suites = "bookworm"
+components = "main"
+key = "https://raw.githubusercontent.com/zerotier/ZeroTierOne/main/doc/contact%40zerotier.com.gpg"
+fingerprint = "74A5E9C458E1A431F1DA57A71657198823E52A61"
+
+[bootstrap.packages]
+"flatpak-user:org.gimp.GIMP" = "latest"
+"flatpak-user:org.telegram.desktop" = "latest"
+"flatpak-user:us.zoom.Zoom" = "latest"
+"flatpak-user:com.brave.Browser" = "latest"
+"flatpak-user:org.keepassxc.KeePassXC" = "latest"
+"apt:megasync" = "latest"
+"apt:syncthing-gtk" = "latest"
+"apt:transmission-gtk" = "latest"
+"apt:libsecret-1-0" = "latest"
+"apt:syncthing" = "latest"
+"apt:zerotier-one" = "latest"
