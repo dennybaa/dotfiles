@@ -17,15 +17,17 @@ def 'mise ls' []: nothing -> list<string> {
 # Run a task or a group of tasks (helper)
 #
 # Example usage:
-#   glob -p stow '[podman, default]'
-#     - Effectively runs stow:podman or stow:podman:* (if it's a group of tasks) and default or default:*.
-#       In any case it won't be failing or trying to execute missing tasks.
+#   glob -p stow podman
+#     - Effectively runs stow:podman or stow:podman:* (if it's a group of tasks)
 #
-#   glob -p group '[sub:specific, sub]'
-#     - Will execute group:sub:specific and group:sub:* (specific will appear twice, but it will be deduplicated)
+#   glob -p setup foo bar
+#     - Run multiple tasks with setup prefix
+#
+#   glob -p stow nest:task or glob -p stow:nest task
+#     - Use nested task globing
 def main [
     --prefix (-p): string         # Task prefix to run (eg: prefix:sub)
-    tasks: string                 # Specific tasks to execute ([podman:*, default-bundle])
+    ...tasks: string              # Specific tasks to execute podman, default-bundle etc
 ] {
     if ($prefix | is-empty) {
         log error "Prefix is required!"
@@ -44,6 +46,6 @@ def main [
     # Execute all tasks in plan
     $plan | each {|task|
         try { ^mise run $task; 0 } catch { 1 }
-    } 
-        | if ($in | any {|i| $i == 1}) { exit 1 }
+    }
+      | if ($in | any {|i| $i == 1}) { exit 1 }
 }

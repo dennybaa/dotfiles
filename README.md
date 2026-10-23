@@ -1,8 +1,10 @@
 # Workstation Setup Guide
 
-Setting up a workstation involves two phases:
-1. **Bootstrap** – Install Nix on a Debian-based system along with base tools
-2. **Provision** – Install APT/Flatpak packages and apply configurations via [mise](https://mise.jdx.dev/lang/rust.html)
+Setting up a workstation takes three steps:
+
+1. **Bootstrap** – Install Nix, mise, and the `nix/bootstrap` profile ([`bootstrap.sh`](bootstrap.sh))
+2. **Deploy** – Stow the shared dotfiles and apply the system configuration (`mise run deploy`)
+3. **Provision** – Install host packages and the Nix profile for this machine (`mise run provision:desktop`)
 
 ## Prerequisites
 
@@ -18,42 +20,65 @@ cd ~ && git clone git@github.com:dennybaa/dotfiles.git
 # cd ~ && git clone https://github.com/dennybaa/dotfiles.git
 ```
 
-## Provision a Workstation
+## Bootstrap
 
-The provision phase installs software and applies system configurations. This is orchestrated by [mise](https://mise.jdx.dev) and uses:
+[`bootstrap.sh`](bootstrap.sh) installs Nix (if missing), mise into `~/.local/bin`, and the
+`nix/bootstrap` profile. It also seeds `~/.config/mise/config.local.toml`, which holds
+packages for this machine only and is never versioned.
 
-- **`nu/install-packages.nu`** – Handles package operations: updating APT sources, installing APT and Flatpak packages
-- **mise** – Executes configuration hooks
+```shell
+cd ~/dotfiles && ./bootstrap.sh
+```
 
-### Bootstrap
+> **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To continue setup in this case, running the command below is **required**:
+> ```shell
+> . /etc/profile.d/nix.sh
+> ```
 
-1. Run the bootstrap script to install Nix:
+## Deploy
 
-    ```shell
-    cd ~/dotfiles && ./bootstrap.sh
-    ```
+Stows `bundle-default` (shell, editors, the global mise config) and applies the templated system
+files (`~/.config/mise`, `~/.config/nix`, `~/.config/systemd`) with `mise dot apply`:
 
-    > **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To continue setup in this case, running the command below is **required**:
-    > ```shell
-    > . /etc/profile.d/nix.sh
-    > ```
+```shell
+mise run deploy
+```
 
-2. Run the post-Nix bootstrap tasks:
+> **📝 Note:** The token comes from gopass (`github/public-api-token`) through fnox. When no store
+> is available, mise asks for it once and keeps it in memory for that run — nothing is written to
+> disk:
+>
+> ```
+> Enter bootstrap secret github_token
+> > ********
+> ```
+>
+> `github_token` is the logical name declared in `[bootstrap.secrets]`; it is read from the
+> `GITHUB_USER_TOKEN_PUBLIC` environment variable. Used by Nix and Mise to authenticate GitHub API
+> requests (higher rate limits instead of anonymous access).
 
-    ```shell
-    mise run bootstrap
-    ```
+## Provision
 
-    > **📝 Note:** The bootstrap process may prompt for local secret values, like the example below:
-    >
-    > ```
-    > Enter your GitHub Personal Access Token (for public repositories, CTRL+D to submit)
-    > >>>
-    > ```
-    >
-    > **`GitHub Personal Access Token for public repositories`**
-    > : Used by Nix and Mise to authenticate API requests when downloading from GitHub (increases rate limits and avoids anonymous access restrictions).
-    
+With the configuration deployed, install this machine's packages and Nix profile. Two presets
+are available:
+
+- **minimal** – a basic set of packages (zsh, tmux, etc.)
+- **desktop** – a full workstation with APT, Flatpak, and Nix packages
+
+```shell
+mise run provision:minimal
+# OR
+mise run provision:desktop
+
+# Additionally: browser and file associations
+mise run 'setup:desktop:*'
+
+# Desktop applications (happ + sing-box DNS reset) are stowed separately
+# from the presets; this also enables their systemd user units
+mise run stow apps-desktop
+```
+
+> **📝 NOTE:** Use `--upgrade` (or `-u`) to also upgrade installed packages and flake inputs.
 
 ## Configuration
 
@@ -63,42 +88,37 @@ View available mise tasks:
 mise tasks
 ```
 
-### Provision a System Preset
-
-Two system presets are available:
-
-- **minimal** – Installs a basic set of packages (zsh, tmux, etc.)
-- **desktop** – Full workstation with APT, Flatpak, and Nix packages
-
-Run the appropriate command:
-
-```shell
-mise run provision:minimal
-# OR
-mise run provision:desktop
-
-# Additionally
-mise run 'setup:desktop:*'
-```
-
-> **📝 NOTE:** Use `--update` (or `-u`) to refresh installed packages, including Flatpak and Nix.
-
 ## Packages
 
-System package configuration is defined in [nu/packages.nu](nu/packages.nu):
+Packages are declared in mise config (`[bootstrap.packages]`), with their repositories in
+`[bootstrap.apt.sources]`:
 
-- **`AptSources`** – Files for `/etc/apt/sources.list.d/` and optional GPG keys
-- **`AptPackages`** and **`FlatpakPackages`** – Packages organized by type (base, desktop, etc.)
-
-Install specific bundles:
+- `stow/bundle-default/.config/mise/config.toml` – base packages, on every machine
+- `stow/bundle-desktop/.config/mise/conf.d/desktop-packages.toml` – desktop-only packages and apt sources
+- `~/.config/mise/config.local.toml` – packages for this machine only (never versioned)
 
 ```shell
-mise r packages:apt default desktop
+# what is declared vs what is installed
+mise bootstrap packages status
+
+# preview, then install the missing packages (--update also refreshes apt metadata)
+mise bootstrap packages apply --dry-run
+mise bootstrap packages apply
+
+# upgrade the declared packages that are already installed
+mise bootstrap packages upgrade
+
+# add a package to the shared config (the stowed ~/.config/mise/config.toml) and install it
+mise bootstrap packages use -g flatpak-user:org.example.App
+# machine-local packages go into ~/.config/mise/config.local.toml by hand (never versioned)
 ```
+
+> **📝 NOTE:** `mise bootstrap packages prune` uninstalls packages no config declares; run it with
+> `--dry-run` first.
 
 ### Nix Profile
 
-A single profile approach is recommended: `nix/desktop`, `nix/vps`, `nix/server`, etc.
+A single profile approach is recommended: `nix/desktop`, `nix/minimal`, etc.
 
 Install a profile:
 

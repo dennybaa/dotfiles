@@ -4,6 +4,8 @@
 #USAGE arg "<packages>" var=#true help="Stow packages to adopt"
 
 set -eo pipefail
+# .stowrc lives in the repo root and stow reads it from cwd only
+cd "$(git rev-parse --show-toplevel)"
 message="${usage_message:-stow adopt}"
 
 # Stash any work in the directory and restore back
@@ -12,7 +14,7 @@ git stash apply stash@{0}
 
 # Adopt might mangle the content, thus we need to preserve this changes
 filename="$(echo ${message} | sed 's/ /_/')-$(date +'%s')".patch
-stow --no-folding --adopt -d stow -v -t ~ ${usage_packages}
+stow --adopt -v ${usage_packages}
 
 # Grab changes and restore
 git diff 'stash@{0}' >"${filename}"

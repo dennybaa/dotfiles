@@ -1,0 +1,40 @@
+{
+  "lastChangelogVersion": "1.1.0",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4.1-flash",
+  "packages": [
+    "npm:pi-opencode-bridge",
+    "npm:pi-web-access",
+    {
+      "source": "npm:@juanibiapina/pi-tokyonight",
+      "themes": [
+        "-themes/tokyonight-day.json",
+        "-themes/tokyonight-storm.json",
+        "-themes/tokyonight.json"
+      ]
+    },
+    {
+      "source": "npm:pi-tui-status-beautifier",
+      "extensions": [
+        "-extensions/tui-status-beautifier.ts"
+      ]
+    },
+    {
+      "source": "npm:@yorch/pi-statusbar",
+      "extensions": [
+        "+extensions/index.ts"
+      ]
+    },
+    "npm:@dietrichgebert/ponytail"
+  ],
+  "theme": "tokyonight-moon",
+  "defaultThinkingLevel": "low",
+  "beautifier": {
+    "style": "glow",
+    "fullFooter": true
+  },
+  "statusbar": {
+    "enabled": true,
+    "preset": "full"
+  }
+}

@@ -1,40 +1,32 @@
+min_version = "2026.10.4"
+
 [settings]
 experimental = true
 
+[env]
+# Resolve dotlib from the repo, so hooks don't depend on the
+# nushell-scripts package having been stowed first. If dotlib is needed
+# run: mise run stow nushell-scripts
+NU_LIB_DIRS = "{{ config_root }}/stow/nushell-scripts/.config/nushell/scripts"
+
 [tools]
-"github:uroybd/DotR" = { version = "1.0.3" }
+fnox = "latest"
 
-[tasks.bootstrap]
-description = "Bootstrap necessary configuration"
-depends = [{ task = "stow", args = ["bundle-default", "nushell-scripts"] }]
-depends_post = [{ task = "dotr", args = ["--profile", "default"] }]
+[secrets.fnox]
 
-[tasks.packages]
-description = "Provision System packages (Apt, Flatpak)"
-usage = '''
-flag "-u --update"          help="Update packages"
-arg "[bundle]" var=#true    help="Specifies which software bundles to install" default="default"
-'''
-interactive = true
-run = 'mise run -j 1 --raw packages:?* ${usage_update:+--update} ${usage_bundle}'
+[bootstrap.secrets]
+github_token = "GITHUB_USER_TOKEN_PUBLIC"
 
+[dotfiles]
+"~/.config/mise/github_tokens.toml" = { source = "templates/github_tokens.toml", mode = "template", permissions = "0600" }
+"~/.config/nix/nix.conf" = { source = "templates/nix.conf", mode = "template", permissions = "0600" }
+"~/.config/systemd/user.conf" = { source = "templates/user.conf", mode = "template" }
 
-[tasks."packages:apt"]
-description = "Provision Apt package bundles"
-usage = '''
-flag "-u --update"          help="Update packages"
-arg "[bundle]" var=#true    help="Specifies which software bundles to install"
-'''
-run = './nu/install-packages.nu apt ${usage_update:+--update} ${usage_bundle}'
-
-
-[tasks."packages:flatpak"]
-description = "Provision Flatpak packages"
-usage = '''
-flag "-u --update"          help="Update packages"
-arg "[bundle]" var=#true    help="Specifies which software bundles to provision" default="default"
-'''
-run = './nu/install-packages.nu flatpak ${usage_update:+--update} ${usage_bundle}'
+[tasks.deploy]
+description = "Deploy dotfiles and system config (stow + mise dotfiles)"
+depends = [{ task = "stow", args = ["bundle-default"] }]
+secrets = ["GITHUB_USER_TOKEN_PUBLIC"]
+run = 'mise dot apply --prompt-secrets'
 
 [tasks."nix:rm"]
 description = "Remove nix profile"
@@ -47,23 +39,28 @@ run = 'nix-collect-garbage'
 
 [tasks."provision:minimal"]
 description = "Provision minimal system"
-usage = 'flag "-u --update" help="Enforce update of installed software"'
+usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
-  'mise run -j 1 --raw packages:?* ${usage_update:+--update} default',
-  'mise run nix ${usage_update:+--update} minimal',
+  'mise run nix ${usage_upgrade:+--update} minimal',
   'mise run stow podman bundle-default',
+  'mise bootstrap packages apply ${usage_upgrade:+--update}',
+  '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
   # 'mise run --raw setup:systemd-linger',
 ]
 
 [tasks."provision:desktop"]
-description = "Provision minimal system"
-usage = 'flag "-u --update" help="Enforce update of installed software"'
+description = "Provision desktop system"
+usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
-  'mise run -j 1 --raw packages:?* ${usage_update:+--update} default desktop',
-  'mise run nix ${usage_update:+--update} desktop',
+  'mise run nix ${usage_upgrade:+--update} desktop',
+  # needed by desktop nix GUI apps: nix libglvnd resolves mesa from /run/opengl-driver
+  'mise run setup:opengl-driver',
+  # stow before packages: bundle-desktop brings conf.d/desktop-packages.toml
   'mise run stow podman bundle-default bundle-desktop',
+  'mise bootstrap packages apply ${usage_upgrade:+--update}',
+  '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
   # 'mise run --raw setup:systemd-linger',
 ]
 
@@ -72,10 +69,13 @@ description = "Stow dotfiles packages"
 usage = '''
 arg "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podman etc)" var=#true
 '''
-run = 'stow --no-folding -d stow -v -t ~ ${usage_packages}'
-depends_post = [
+# cwd must be the repo root: .stowrc is read from there
+# (stow only looks in cwd and $HOME)
+dir = '{{ config_root }}'
+run = [
+  'stow -v ${usage_packages}',
   # Invoke tasks for each package: mise-tasks/<prefix>/<package>
-  { task = "glob", args = ["--prefix", "stow", "{{usage.packages}}"] },
+  'mise run glob --prefix stow ${usage_packages}',
 ]
 
 [tasks."stow:delete"]
@@ -83,20 +83,9 @@ description = "Unstow dotfiles packages"
 usage = '''
 arg  "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podman etc)" var=#true
 '''
-run = 'stow -D --no-folding -d stow -v -t ~ ${usage_packages}'
-depends = [
-  { task = "glob", env = { hookAction = "delete" }, args = [
-    "--prefix",
-    "stow",
-    "{{usage.packages}}",
-  ] },
+env = { hookAction = "delete" }
+dir = '{{ config_root }}'
+run = [
+  'mise run glob --prefix stow ${usage_packages}',
+  'stow -D -v ${usage_packages}',
 ]
-
-[tasks.dotr]
-description = "Run DotR deploy tasks (with templating)"
-dir = '{{ config_root }}/dotr'
-usage = '''
-flag "--profile -P <profile>" help="Profile to use"
-flag "--dry-run -d" help="Dry run"
-'''
-run = 'dotr deploy ${usage_dry_run:+--dry-run} --clean false -P ${usage_profile}'

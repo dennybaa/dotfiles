@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+tokyonight() {
+  config_dir="$(bat --config-dir)/themes"
+  [ -d "$config_dir" ] || mkdir -p "$config_dir"
+  themes="tokyonight_night.tmTheme tokyonight_moon.tmTheme tokyonight_storm.tmTheme"
+  installed=""
+
+  for theme in $themes; do
+    if [ ! -f "${config_dir}/${theme}" ]; then
+      curl -sL "https://raw.githubusercontent.com/folke/tokyonight.nvim/main/extras/sublime/${theme}" -o "${config_dir}/${theme}"
+      installed="true"
+    fi
+  done
+
+  [ -z "$installed" ] || bat cache --build && true
+}
+
+# Install
+tokyonight

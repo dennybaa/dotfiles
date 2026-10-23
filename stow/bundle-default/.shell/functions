@@ -14,11 +14,18 @@ if command -v k3d 2>/dev/null 1>&2; then
   }
 fi
 
-# Add nvim command
+# Set $EDITOR and created function ed for nvim
 if command -v nvim 2>/dev/null 1>&2; then
   export EDITOR=$(command -v nvim)
   ed() {
-    $EDITOR "${@:-.}"
+    # Change into directory without revealing nvtree
+    if [ -d "$1" ]; then
+      chdir="+cd $1"
+      shift
+      $EDITOR "$chdir" "$@"
+    else
+      $EDITOR "$@"
+    fi
   }
 fi
 
@@ -39,5 +46,17 @@ if command -v podman 2>&1 | grep -q '\.nix-profile'; then
     else
       command $HOME/.nix-profile/lib/systemd/user-generators/podman-user-generator "$@"
     fi
+  }
+fi
+
+# Add y helper function
+if command -v yazi 2>/dev/null 1>&2; then
+  function y() {
+    local tmp cwd
+    tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    command yazi "$@" --cwd-file="$tmp"
+    IFS= read -r -d '' cwd <"$tmp"
+    [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+    command rm -f -- "$tmp"
   }
 fi

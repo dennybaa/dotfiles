@@ -1,0 +1,23 @@
+#!/bin/sh
+#MISE description="Link /run/opengl-driver to the nix profile (GPU userspace for nix apps)"
+#MISE hide=true
+#
+# nixpkgs libglvnd searches /run/opengl-driver/share/glvnd/egl_vendor.d before the
+# system paths, while system glvnd only searches /etc/glvnd and /usr/share/glvnd.
+# Linking that path keeps the nix and system GL stacks apart, so no
+# LD_LIBRARY_PATH/__EGL_VENDOR_LIBRARY_FILENAMES has to leak into the session.
+# /run is a tmpfs: systemd-tmpfiles recreates the link on every boot.
+set -e
+
+conf=/etc/tmpfiles.d/opengl-driver.conf
+# shortcut: single-user machine, the link targets this user's profile.
+rule="L+ /run/opengl-driver - - - - $HOME/.nix-profile"
+
+if [ "$(cat "$conf" 2>/dev/null)" = "$rule" ] && [ "$(readlink /run/opengl-driver 2>/dev/null)" = "$HOME/.nix-profile" ]; then
+    echo "opengl-driver: already linked to $HOME/.nix-profile"
+    exit 0
+fi
+
+printf '%s\n' "$rule" | sudo tee "$conf" >/dev/null
+sudo systemd-tmpfiles --create "$conf"
+ls -l /run/opengl-driver

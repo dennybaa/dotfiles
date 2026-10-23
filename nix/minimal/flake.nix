@@ -30,8 +30,7 @@
         {
           default = pkgs.symlinkJoin {
             name = "default";
-            paths = bundle.bootstrap ++ bundle.shellTools ++ bundle.coding ++ bundle.netUtils ++ bundle.podman;
-
+            paths = bundle.bootstrap ++ bundle.cliTools ++ bundle.coding ++ bundle.netUtils ++ bundle.podman;
             nativeBuildInputs = [ pkgs.makeWrapper ];
           };
         };

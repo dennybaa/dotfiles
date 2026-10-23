@@ -1,0 +1,17 @@
+# Shared by `mise run stow` and manual invocations: --no-folding is required
+# because several packages write into the same target directories.
+#
+# Stow reads this file from cwd (or $HOME) only, so the mise stow tasks pin
+# their dir to the repo root. A hand-typed stow from elsewhere skips it.
+#
+# Ignore list (one copy instead of a .stow-local-ignore per package).
+# Nested README/LICENSE need explicit patterns: stow's built-in list only
+# matches those at the package root.
+-d stow
+-t ~
+--no-folding
+--ignore=README\..*
+--ignore=LICENSE
+--ignore=Makefile
+--ignore=\.DS_Store
+--ignore=.*\.md$

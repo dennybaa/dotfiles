@@ -13,5 +13,9 @@ ohmyzsh/ohmyzsh path:plugins/zoxide
 ohmyzsh/ohmyzsh path:plugins/tmux
 ohmyzsh/ohmyzsh path:plugins/fzf
 
+# zsh completions with fzf-tab
+aloxaf/fzf-tab
+
 # from github
 unixorn/warhol.plugin.zsh
+atuinsh/atuin

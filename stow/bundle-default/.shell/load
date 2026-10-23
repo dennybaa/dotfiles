@@ -1,5 +1,5 @@
 #!/bin/sh
-# vim: set filetype=bash:
+# vim: set filetype=sh:
 . ~/.shell/lib
 
 # Source nix profile on any shell
@@ -10,6 +10,8 @@ fi
 # Eaarly load for bash+zsh tools
 if shell_is bash zsh; then
   safe_eval mise activate $_shell
+  # safe_eval fnox activate $_shell
+  safe_eval mise completion $_shell
   safe_eval starship init $_shell
   safe_eval wt config shell init $_shell
 fi
@@ -25,6 +27,7 @@ esac
 # Source tools and functions
 source_on ~/.shell/antidote zsh
 source_on ~/.shell/functions bash zsh
+source_on ~/.shell/completions bash zsh
 
 # Late load tools
 if shell_is bash zsh; then
@@ -35,6 +38,6 @@ fi
 # Aliases
 alias ta="tmux a"
 alias her="herdr"
-
+alias pa="pi --model longcat-2.5-preview-free -p"
 
 ## Note!: run unset_lib in caller to clean up lib functions

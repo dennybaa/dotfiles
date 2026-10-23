@@ -20,6 +20,10 @@ _dot_add_colorize_progs ss
 
 # Set oh-my-zsh update to auto mode
 zstyle ':omz:update' mode auto
-# Load antidote
-. ~/.nix-profile/share/antidote/antidote.zsh
-antidote load ${HOME}/.zsh_plugins.txt
+zstyle ':plugin:ez-compinit' 'compstyle' 'zshzoo'
+
+# Load antidote (the nix profile may not be installed yet, e.g. right after `mise run deploy`)
+if [ -r ~/.nix-profile/share/antidote/antidote.zsh ]; then
+  . ~/.nix-profile/share/antidote/antidote.zsh
+  antidote load ${HOME}/.zsh_plugins.txt
+fi
