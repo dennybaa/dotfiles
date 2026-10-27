@@ -1,0 +1,9 @@
+{
+  "id": "tokyo_night_modes",
+  "base": "tokyo_night",
+  "chrome": {
+    "accent_bright": "#79a2f7",
+    "success": "#41a6b5",
+    "border": {"copy": "#bb9af7"}
+  }
+}

@@ -2,3 +2,4 @@
 nix/desktop/flake.nix
 /fnox.local.toml
 /.fnox.local.toml
+/.cache/

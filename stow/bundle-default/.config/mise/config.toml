@@ -17,6 +17,7 @@ atuin = "latest"
 gopass = "latest"
 age = "latest"
 "github:chawyehsu/pinentry-wukong" = "latest"
+"github:Gaurav-Gosain/tuios" = "latest"
 
 [bootstrap.packages]
 "apt:bind9-dnsutils" = "latest"

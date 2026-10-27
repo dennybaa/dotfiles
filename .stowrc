@@ -6,7 +6,8 @@
 #
 # Ignore list (one copy instead of a .stow-local-ignore per package).
 # Nested README/LICENSE need explicit patterns: stow's built-in list only
-# matches those at the package root.
+# matches those at the package root. Markdown is otherwise stowed on purpose:
+# agent skills ship SKILL.md + references/*.md. A package's docs/ dir is not.
 -d stow
 -t ~
 --no-folding
@@ -14,4 +15,4 @@
 --ignore=LICENSE
 --ignore=Makefile
 --ignore=\.DS_Store
---ignore=.*\.md$
+--ignore=(^|/)docs(/|$)

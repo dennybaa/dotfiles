@@ -1,0 +1,32 @@
+# Packages no package manager can reach (not in nixpkgs, apt or flathub).
+# Installed by the matching `mise run pkg:<kind>` task as part of
+# provision:desktop; bump a URL to upgrade.
+
+# .deb releases: key = your own label (any name you like), value = URL to the .deb.
+# The package name and version are read from the .deb, so a label can be a reminder
+# ("velo-mail") rather than the dpkg name.
+[deb]
+#velo = "https://github.com/avihaymenahem/velo/releases/download/velo-v0.4.21/Velo_0.4.21_amd64.deb"
+happ = "https://github.com/Happ-proxy/happ-desktop/releases/download/4.5.4/Happ.linux.x64.deb"
+mailspring = "https://github.com/Foundry376/Mailspring/releases/download/1.26.2/mailspring-1.26.2-amd64.deb"
+
+# Single-file .flatpak bundles (not on flathub): key = app id, value = bundle URL.
+# Not implemented yet - `pkg:deb` ignores this table.
+# [flatpak]
+
+# Agent skills, installed globally by the `skills` CLI (into ~/.agents/skills).
+# `source` is whatever the CLI accepts: `owner/repo`, a bare name, or a URL.
+# `name` is optional (omit it to install every skill in the source). `agents` is
+# optional too: omit it to install for every agent the CLI detects (noisy, the
+# agents without a global dir report a failure), or list targets like
+# `agents = ["pi"]` to limit it. No version pin: upgrade with `skills update -g`.
+# tuios is not here - `tuios integration install` writes its own local skill.
+[[skills]]
+source = "sherifabdlnaby/skills"
+name = "mise-fy"
+agents = ["pi"]
+
+[[skills]]
+source = "vercel-labs/skills"
+name = "find-skills"
+#agents = ["pi"]

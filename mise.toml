@@ -61,6 +61,10 @@ run = [
   'mise run stow podman bundle-default bundle-desktop',
   'mise bootstrap packages apply ${usage_upgrade:+--update}',
   '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
+  # [deb] in packages.toml: releases with no nixpkgs/apt/flathub package (velo)
+  'mise run pkg:deb',
+  # [[skills]] in packages.toml: agent skills for pi
+  'mise run pkg:skills',
   # 'mise run --raw setup:systemd-linger',
 ]
 
