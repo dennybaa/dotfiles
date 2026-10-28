@@ -1,12 +1,12 @@
 #!/usr/bin/env nu
-#MISE description="Install the .debs declared in packages.toml via apt (dpkg-tracked, deps resolved)"
+#MISE description="Install the .debs declared in provision.toml via apt (dpkg-tracked, deps resolved)"
 #MISE raw_args=true
 
 # Apt has no notion of a local .deb, so a release that only ships one cannot be
-# declared in [bootstrap.packages] ([deb] in packages.toml). This fetches them
+# declared in [bootstrap.packages] ([deb] in provision.toml). This fetches them
 # and hands them to apt, which keeps owning the package afterwards
 # (`apt remove <pkg>` works and mise never claims to have installed it).
-const Plan = 'packages.toml'
+const Plan = 'provision.toml'
 # Repo-local and gitignored. World-readable, so apt's _apt sandbox can read it.
 const Cache = '.cache/debs'
 
@@ -17,12 +17,14 @@ def main [] {
     mkdir $cache
 
     mut todo = []
+    mut same = 0
     # Keys are free-form labels; the package name always comes from the .deb itself,
     # so dpkg/apt state is checked against what the file really installs.
     for entry in ($debs | items {|tag, url| { tag: $tag, url: $url } }) {
         # Hash the URL into the cache name
         let deb = ($cache | path join $"($entry.url | hash sha256 | str substring 0..8)-($entry.url | path basename)")
         if not ($deb | path exists) {
+            print $"($entry.tag): downloading ($entry.url)"
             # Download to .part and rename: a failed fetch must never be mistaken
             # for a cached .deb on the next run.
             let dl = (do { ^curl -fsSL --output $"($deb).part" $entry.url } | complete)
@@ -45,14 +47,20 @@ def main [] {
             error make { msg: $"($entry.tag): unparsable control fields '($pkg)' / '($ver)'" }
         }
         let have = (do { ^dpkg-query -W -f '${Version}' $pkg } | complete)
-        if $have.exit_code == 0 and ($have.stdout | str trim) == $ver {
-            print $"($entry.tag): ($pkg) ($ver) installed"
+        # Up to date: nothing to do, count it for the summary.
+        if ($have.exit_code == 0 and ($have.stdout | str trim) == $ver) {
+            $same += 1
         } else {
             $todo = ($todo | append $deb)
         }
     }
 
-    if ($todo | is-empty) { return }
+    if ($todo | is-empty) {
+        print $"($same) deb package\(s\) already installed"
+        return
+    }
     # apt, not dpkg: it resolves the debs' Depends from the configured archives.
-    sudo apt-get install -y ...$todo
+    # -qq keeps apt's package-list and progress output off the terminal; errors still show.
+    sudo apt-get install -qq -y ...$todo
+    print $"($todo | length) deb package\(s\) installed, ($same) already installed"
 }

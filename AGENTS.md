@@ -20,7 +20,7 @@ changing the repo; [`README.md`](README.md) is the user-facing setup guide.
 | `nix/<profile>/` | Flake per profile (`bootstrap`, `minimal`, `desktop`); `bundles.nix` shared package lists |
 | `mise-tasks/<prefix>/<name>` | One mise task per file; path becomes the task name (`stow/bundle-default/bat-themes` → `stow:bundle-default:bat-themes`) |
 | `mise.toml` | Repo-level tasks (`deploy`, `provision:*`, `stow`) + dotfile templates |
-| `packages.toml` | What no package manager ships: `[deb]` = `label = url` (installed by `pkg:deb` into `.cache/debs/`), `[[skills]]` = agent skills (installed by `pkg:skills`) |
+| `provision.toml` | What no package manager can carry, one table per task that applies it: `[deb]` = `label = url` (installed by `pkg:deb` into `.cache/debs/`), `[[skills]]` = agent skills (installed by `pkg:skills`), `[mime]` = default MIME associations (set by the `stow:bundle-desktop:mimeapps` hook) |
 | `templates/` | Files rendered into `~/.config/...` by `mise dot apply` |
 | `docs/` | Deeper notes (nix, podman) |
 
@@ -64,7 +64,7 @@ and apt has no notion of a local one, so its *name* cannot be declared anywhere.
    because that registry builds). `cd ~ && mise use -n -g github:owner/repo`, then again
    without `-n`.
 4. **direct URL** — only a file is published and no apt index carries its name: a `.deb`
-   on a release page, a vendor download link. `[deb]` in `packages.toml` as `label = url`,
+   on a release page, a vendor download link. `[deb]` in `provision.toml` as `label = url`,
    upgraded by bumping the URL. `mise run pkg:deb` (part of `provision:desktop`; sudo)
    fetches it into `.cache/debs/` and hands it to `apt-get install`, which owns it
    afterwards (`apt remove` works; re-runs skip versions already installed).

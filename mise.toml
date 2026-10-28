@@ -55,15 +55,10 @@ usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
   'mise run nix ${usage_upgrade:+--update} desktop',
-  # needed by desktop nix GUI apps: nix libglvnd resolves mesa from /run/opengl-driver
-  'mise run setup:opengl-driver',
-  # stow before packages: bundle-desktop brings conf.d/desktop-packages.toml
   'mise run stow podman bundle-default bundle-desktop',
   'mise bootstrap packages apply ${usage_upgrade:+--update}',
   '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
-  # [deb] in packages.toml: releases with no nixpkgs/apt/flathub package (velo)
   'mise run pkg:deb',
-  # [[skills]] in packages.toml: agent skills for pi
   'mise run pkg:skills',
   # 'mise run --raw setup:systemd-linger',
 ]

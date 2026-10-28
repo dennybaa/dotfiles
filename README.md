@@ -116,29 +116,17 @@ mise bootstrap packages use -g flatpak-user:org.example.App
 > **📝 NOTE:** `mise bootstrap packages prune` uninstalls packages no config declares; run it with
 > `--dry-run` first.
 
-### Packages outside every package manager
+### Outside every package manager
 
-A tool that only ships a `.deb` on a release page (not in nixpkgs, an apt repo or Flathub) goes
-under `[deb]` in [`packages.toml`](packages.toml): key = a label of your choice, value = direct URL
-to the `.deb` (package name and version are read from the file, so the label is just a reminder). `mise run pkg:deb` (part of `provision:desktop`) downloads them into the gitignored
-`.cache/debs/` and hands them to apt, so `dpkg` keeps owning them (`apt remove <pkg>` works).
-Bump the URL to upgrade.
+[`provision.toml`](provision.toml) holds what no registry can carry, one table per task:
 
-```shell
-mise run pkg:deb
-```
+| Table | Command | Action |
+|---|---|---|
+| `[deb]` | `mise run pkg:deb` | fetches each `label = url` into `.cache/debs/` and hands it to apt (bump the URL to upgrade) |
+| `[[skills]]` | `mise run pkg:skills` | installs agent skills into `~/.agents/skills/` |
+| `[mime]` | `mise run stow bundle-desktop` | sets default MIME associations (`xdg-mime`), runs with the desktop bundle |
 
-Agent skills follow the same model: `[[skills]]` in [`packages.toml`](packages.toml) lists
-what the `skills` CLI should install globally (`source` = `owner/repo`, a bare name or a URL;
-optional `name` to pick one skill out of the source; optional `agents` = the targets, e.g.
-`["pi"]` — omit it and every detected agent is attempted). `mise run pkg:skills` (also part of
-`provision:desktop`) installs them into `~/.agents/skills/`. Entries already installed (same
-name and source) are skipped, so re-running is cheap; an entry without `name` cannot be matched
-and is always re-added. The list carries no version — upgrade with `skills update -g`.
-
-```shell
-mise run pkg:skills
-```
+All three run as part of `provision:desktop`.
 
 ### Nix Profile
 

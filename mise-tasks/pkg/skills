@@ -1,12 +1,12 @@
 #!/usr/bin/env nu
-#MISE description="Install the agent skills declared under [[skills]] in packages.toml, globally, via the skills CLI"
-const Plan = 'packages.toml'
+#MISE description="Install the agent skills declared under [[skills]] in provision.toml, globally, via the skills CLI"
+const Plan = 'provision.toml'
 
 def norm [source: string] {
     $source | str lowercase | str replace -r '^https?://github\.com/' '' | str replace -r '\.git$' ''
 }
 
-# Install the [[skills]] entries in packages.toml that are not installed yet.
+# Install the [[skills]] entries in provision.toml that are not installed yet.
 def main [] {
     let root = $env.MISE_PROJECT_ROOT
     let skills = (open ($root | path join $Plan) | get -o skills | default [])
@@ -23,7 +23,7 @@ def main [] {
     for entry in $skills {
         let source = ($entry | get -o source)
         if ($source | is-empty) {
-            error make { msg: $"packages.toml: [[skills]] entry without a source: ($entry | to json -r)" }
+            error make { msg: $"provision.toml: [[skills]] entry without a source: ($entry | to json -r)" }
         }
         let name = ($entry | get -o name)
         let key = $"($name | default '')@(norm $source)"
@@ -45,7 +45,7 @@ def main [] {
         print -n $"installing ($label)... "
         let run = (do { ^skills ...$cmd } | complete)
         if $run.exit_code != 0 {
-            print "failed" 
+            print "failed"
             let err = ($run.stderr | ansi strip | str trim)
             let mark = ($run.stdout | ansi strip | lines | each {|l| $l | str trim } | where {|l| $l =~ '■|✗'} | first | default '')
             let detail = if not ($err | is-empty) { $err } else if not ($mark | is-empty) { $mark } else { "no message" }
@@ -55,5 +55,10 @@ def main [] {
         $added += 1
     }
 
-    print $"skills: ($added) installed, ($skipped) already installed"
+    # One line, same shape as pkg:deb.
+    if ($added == 0) {
+        print $"($skipped) skill\(s\) already installed"
+        return
+    }
+    print $"($added) skill\(s\) installed, ($skipped) already installed"
 }

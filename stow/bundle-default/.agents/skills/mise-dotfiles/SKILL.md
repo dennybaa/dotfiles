@@ -3,7 +3,7 @@ name: mise-dotfiles
 description: >
   Install, pin, bump or remove a host-level package/tool with mise so it lands in this dotfiles repo: `mise
   use -g` writing the stow-managed ~/.config/mise/config.toml or a conf.d/*.toml bundle fragment, plus where
-  a tool belongs in the first place (mise [tools] vs a Nix bundle vs apt via mise bootstrap vs packages.toml
+  a tool belongs in the first place (mise [tools] vs a Nix bundle vs apt via mise bootstrap vs provision.toml
   [deb]). Covers backend install syntax (github:/packslip:/aqua:/cargo:/go:/npm:/pypi:/gem:/dotnet:/http:/
   s3:/vfox:), picking the safest backend, upgrading (`mise up` vs `--bump` vs `mise outdated`, prune
   grace period, why a `latest` upgrade leaves no git diff), and install failures: unknown backend, no

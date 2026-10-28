@@ -1,6 +1,9 @@
-# Packages no package manager can reach (not in nixpkgs, apt or flathub).
-# Installed by the matching `mise run pkg:<kind>` task as part of
-# provision:desktop; bump a URL to upgrade.
+# Declarations no package manager can carry (not in nixpkgs, apt or flathub) and
+# that therefore need a bespoke task. Each table names the task that applies it:
+#   [deb] -> mise run pkg:deb          [[skills]] -> mise run pkg:skills
+#   [mime] -> mise run stow:bundle-desktop:mimeapps (a stow hook, so
+#             provision:desktop runs it with the bundle)
+# Not general provisioning config - that is mise.toml and the stow bundles.
 
 # .deb releases: key = your own label (any name you like), value = URL to the .deb.
 # The package name and version are read from the .deb, so a label can be a reminder
@@ -30,3 +33,12 @@ agents = ["pi"]
 source = "vercel-labs/skills"
 name = "find-skills"
 #agents = ["pi"]
+
+# Default MIME associations, set with `xdg-mime default` by the
+# stow:bundle-desktop:mimeapps hook. Only what the desktop would not pick on its
+# own: keys COSMIC sets (browser, terminal) stay out. Nothing is removed from
+# ~/.config/mimeapps.list, and ~/.config/cosmic-mimeapps.list outranks it for the
+# types it lists, so an entry here can still lose to the desktop.
+[mime]
+"x-scheme-handler/mailto" = "Mailspring.desktop"
+"x-scheme-handler/mailspring" = "Mailspring.desktop"
