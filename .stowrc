@@ -4,11 +4,13 @@
 # Stow reads this file from cwd (or $HOME) only, so the mise stow tasks pin
 # their dir to the repo root. A hand-typed stow from elsewhere skips it.
 #
+# No -d here: each bundle is its own stow directory, chosen per invocation
+# (`mise run stow minimal`, or `stow -d stow/minimal shell` by hand).
+#
 # Ignore list (one copy instead of a .stow-local-ignore per package).
 # Nested README/LICENSE need explicit patterns: stow's built-in list only
 # matches those at the package root. Markdown is otherwise stowed on purpose:
 # agent skills ship SKILL.md + references/*.md. A package's docs/ dir is not.
--d stow
 -t ~
 --no-folding
 --ignore=README\..*

@@ -9,7 +9,7 @@ SHELL := /bin/bash
 ROOT := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 
 # Stow package holding the Yazi config.
-YAZI_DIR := stow/bundle-default/.config/yazi
+YAZI_DIR := stow/minimal/yazi/.config/yazi
 YAZI_PLUGINS_DIR := $(YAZI_DIR)/plugins
 
 .DEFAULT_GOAL := help

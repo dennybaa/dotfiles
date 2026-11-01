@@ -1,0 +1,61 @@
+#!/usr/bin/env nu
+#MISE description="Apply the default MIME associations declared under [mime] in provision.toml"
+#MISE hide=true
+#
+# A stow hook, not a stowed file: the desktop rewrites ~/.config/mimeapps.list by
+# rename(), which replaces a symlink and used to make `mise run stow desktop` abort.
+# A `copy` entry would work but reasserts the whole file, dropping the keys the
+# desktop added since. So the file stays the desktop's, and only the associations
+# listed in [mime] are set with `xdg-mime default`.
+#
+# Only the [Default Applications] section is written and nothing is ever removed;
+# `xdg-mime query default` first, so a correct association is left untouched.
+const Plan = 'provision.toml'
+
+# xdg-mime resolves desktop files from these; XDG_DATA_DIRS already carries the
+# flatpak exports on a desktop host.
+def app_dirs [] {
+    let data_home = ($env.XDG_DATA_HOME? | default ($env.HOME | path join '.local/share'))
+    let data_dirs = ($env.XDG_DATA_DIRS? | default '/usr/local/share:/usr/share' | split row ':')
+    ([$data_home] ++ $data_dirs) | each {|d| $d | path join 'applications' } | uniq
+}
+
+def main [] {
+    let root = $env.MISE_PROJECT_ROOT
+    let mime = (open ($root | path join $Plan) | get -o mime | default {})
+    if ($mime | is-empty) { return }
+
+    if (which xdg-mime | is-empty) {
+        error make { msg: 'xdg-mime missing (xdg-utils)' }
+    }
+
+    let dirs = (app_dirs)
+    mut set = 0
+    mut same = 0
+    mut skipped = []
+    for entry in ($mime | items {|type, app| { type: $type, app: $app } }) {
+        # xdg-mime happily writes a handler that does not exist, so check first.
+        if not ($dirs | any {|d| ($d | path join $entry.app) | path exists }) {
+            $skipped = ($skipped | append $entry)
+            continue
+        }
+
+        let cur = (do { ^xdg-mime query default $entry.type } | complete)
+        if $cur.exit_code == 0 and ($cur.stdout | str trim) == $entry.app {
+            $same += 1
+            continue
+        }
+
+        let run = (do { ^xdg-mime default $entry.app $entry.type } | complete)
+        if $run.exit_code != 0 {
+            error make { msg: $"($entry.type): xdg-mime default failed: ($run.stderr | str trim)" }
+        }
+        print $"($entry.type) -> ($entry.app)"
+        $set += 1
+    }
+
+    for entry in $skipped {
+        print $"WARN ($entry.type)=($entry.app): no such desktop file in the ($dirs | length) applications dirs, skipped"
+    }
+    print $"mime: ($set) set, ($same) already correct, ($skipped | length) skipped"
+}

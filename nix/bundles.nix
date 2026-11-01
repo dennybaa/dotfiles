@@ -87,7 +87,7 @@
 
   # GPU userspace (mesa vendors, DRI drivers) for nix GUI apps. nixpkgs libglvnd
   # looks for it in /run/opengl-driver, which is linked to this profile when
-  # bundle-desktop is stowed (mise-tasks/stow/bundle-desktop/opengl-driver).
+  # the desktop composition is stowed (mise-tasks/hooks/stow/desktop/_bundle/opengl-driver).
   gpuDrivers = [
     latest.mesa
   ];

@@ -13,7 +13,7 @@ def main [] {
     if ($skills | is-empty) { return }
 
     if (which skills | is-empty) {
-        error make { msg: "skills CLI missing: npm:skills is in bundle-desktop/.config/mise/conf.d/code.toml" }
+        error make { msg: "skills CLI missing: npm:skills is in stow/desktop/mise/.config/mise/conf.d/code.toml" }
     }
 
     let known = (^skills ls -g --json | from json | each {|s| $"($s.name)@(norm ($s.source | default ''))" })

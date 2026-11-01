@@ -6,8 +6,8 @@ experimental = true
 [env]
 # Resolve dotlib from the repo, so hooks don't depend on the
 # nushell-scripts package having been stowed first. If dotlib is needed
-# run: mise run stow nushell-scripts
-NU_LIB_DIRS = "{{ config_root }}/stow/nushell-scripts/.config/nushell/scripts"
+# run: mise run stow minimal/nushell-scripts
+NU_LIB_DIRS = "{{ config_root }}/stow/minimal/nushell-scripts/.config/nushell/scripts"
 
 [tools]
 fnox = "latest"
@@ -24,7 +24,7 @@ github_token = "GITHUB_USER_TOKEN_PUBLIC"
 
 [tasks.deploy]
 description = "Deploy dotfiles and system config (stow + mise dotfiles)"
-depends = [{ task = "stow", args = ["bundle-default"] }]
+depends = [{ task = "stow", args = ["minimal"] }]
 secrets = ["GITHUB_USER_TOKEN_PUBLIC"]
 run = 'mise dot apply --prompt-secrets'
 
@@ -43,7 +43,7 @@ usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
   'mise run nix ${usage_upgrade:+--update} minimal',
-  'mise run stow podman bundle-default',
+  'mise run stow minimal',
   'mise bootstrap packages apply ${usage_upgrade:+--update}',
   '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
   # 'mise run --raw setup:systemd-linger',
@@ -55,7 +55,7 @@ usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
   'mise run nix ${usage_upgrade:+--update} desktop',
-  'mise run stow podman bundle-default bundle-desktop',
+  'mise run stow desktop',
   'mise bootstrap packages apply ${usage_upgrade:+--update}',
   '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
   'mise run pkg:deb',
@@ -64,27 +64,28 @@ run = [
 ]
 
 [tasks.stow]
-description = "Stow dotfiles packages"
+description = "Stow a bundle (minimal, desktop) or one package"
 usage = '''
-arg "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podman etc)" var=#true
+arg "<targets>" help="Bundle name (minimal, desktop), or bundle/package (minimal/nvim)" var=#true
 '''
 # cwd must be the repo root: .stowrc is read from there
 # (stow only looks in cwd and $HOME)
 dir = '{{ config_root }}'
-run = [
-  'stow -v ${usage_packages}',
-  # Invoke tasks for each package: mise-tasks/<prefix>/<package>
-  'mise run glob --prefix stow ${usage_packages}',
-]
+run = 'mise run stow:apply ${usage_targets}'
 
 [tasks."stow:delete"]
-description = "Unstow dotfiles packages"
+description = "Unstow a bundle or one package"
 usage = '''
-arg  "<packages>" help="Specify the package(s) to stow (eg: bundle-default, podman etc)" var=#true
+arg "<targets>" help="Bundle name (minimal, desktop), or bundle/package (minimal/nvim)" var=#true
 '''
 env = { hookAction = "delete" }
 dir = '{{ config_root }}'
-run = [
-  'mise run glob --prefix stow ${usage_packages}',
-  'stow -D -v ${usage_packages}',
-]
+run = 'mise run stow:apply --delete ${usage_targets}'
+
+[tasks."stow:show"]
+description = "Print what a bundle expands to"
+usage = '''
+arg "<targets>" help="Bundle name (minimal, desktop), or bundle/package (minimal/nvim)" var=#true
+'''
+dir = '{{ config_root }}'
+run = 'mise run stow:apply --show ${usage_targets}'
