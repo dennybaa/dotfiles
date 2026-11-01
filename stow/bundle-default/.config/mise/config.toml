@@ -17,7 +17,7 @@ atuin = "latest"
 gopass = "latest"
 age = "latest"
 "github:chawyehsu/pinentry-wukong" = "latest"
-"github:Gaurav-Gosain/tuios" = { version = "latest", matching = "tuios-ghostty" }
+"github:Gaurav-Gosain/tuios" = { version = "0.12.1" }  #, matching = "tuios-ghostty" }
 
 [bootstrap.packages]
 "apt:bind9-dnsutils" = "latest"

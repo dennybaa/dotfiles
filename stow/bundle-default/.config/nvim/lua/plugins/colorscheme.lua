@@ -7,6 +7,7 @@ return {
   },
   {
     "folke/tokyonight.nvim",
+    -- moon here; ghostty stays on TokyoNight (night #1a1b26) on purpose - editor has a ligher background.
     opts = {
       style = "moon",
     },
