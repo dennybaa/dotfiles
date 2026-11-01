@@ -20,10 +20,24 @@ _dot_add_colorize_progs ss
 
 # Set oh-my-zsh update to auto mode
 zstyle ':omz:update' mode auto
-zstyle ':plugin:ez-compinit' 'compstyle' 'zshzoo'
 
 # Load antidote (the nix profile may not be installed yet, e.g. right after `mise run deploy`)
 if [ -r ~/.nix-profile/share/antidote/antidote.zsh ]; then
   . ~/.nix-profile/share/antidote/antidote.zsh
   antidote load ${HOME}/.zsh_plugins.txt
+
+  # zephyr completion style
+  if (( $+functions[compstyleinit] )); then
+    compstyleinit
+    compstyle zephyr
+  fi
+
+  # plain group labels (fzf-tab can't expand %F), and no native menu (fzf-tab owns it)
+  zstyle ':completion:*' format ' -- %d --'
+  zstyle ':completion:*:descriptions' format ' -- %d --'
+  zstyle ':completion:*:corrections' format ' -- %d (errors: %e) --'
+  zstyle ':completion:*:*:*:*:*' menu no
+  zstyle ':completion:*:*:cd:*:directory-stack' menu no
+  zstyle ':completion:*:*:kill:*' menu no
+  zstyle ':completion:*:man:*' menu no
 fi

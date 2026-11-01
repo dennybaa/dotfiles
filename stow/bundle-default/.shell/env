@@ -10,6 +10,12 @@ _dot_append_paths \
   "${HOME}/.local/bin" \
   "${HOME}/.local/scripts"
 
+# zsh: index completions shipped by nix profile derivations (env is sh-sourced too,
+# so the array assignment has to sit behind eval)
+if [ -n "${ZSH_VERSION:-}" ]; then
+  eval 'fpath=("${HOME}/.nix-profile/share/zsh/site-functions" $fpath)'
+fi
+
 # Code for none interactive shells (load tools which update PATH)
 case $- in
 *i*) ;;

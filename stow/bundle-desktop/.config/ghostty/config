@@ -51,3 +51,6 @@
 theme = TokyoNight
 font-family = "JetBrainsMono Nerd Font"
 font-size = 10
+# Ctrl+click stays with the program in the pane: tuios' appearance.link_opener
+# opens links in terminal-browser, ghostty opening them too would eat the click.
+link-url = false

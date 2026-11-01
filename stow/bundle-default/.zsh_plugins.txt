@@ -1,5 +1,5 @@
-# install the compint wrapper
-mattmc3/ez-compinit
+# completion styles only (no compinit); compinit is owned by use-omz below
+mattmc3/zephyr path:plugins/compstyle
 
 # oh-my-zsh
 getantidote/use-omz

@@ -31,6 +31,7 @@ cd ~/dotfiles && ./bootstrap.sh
 ```
 
 > **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To continue setup in this case, running the command below is **required**:
+>
 > ```shell
 > . /etc/profile.d/nix.sh
 > ```

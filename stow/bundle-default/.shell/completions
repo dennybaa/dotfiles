@@ -1,5 +1,8 @@
 #!/bin/sh
 # vim: set filetype=bash:
-# Safely source completions (if command exits) for tools
+# Extra shell completions for zsh and bash — only for tools whose completions
+# neither nix nor a newer mise (packslip) install ships. Written to disk, not eval'd.
 
-source_cmd gopass completion $_shell
+gen_completion "gopass completion $_shell" "$_shell"
+gen_completion "mise completion $_shell" "$_shell"
+gen_completion "tuios completion $_shell" "$_shell"

@@ -11,3 +11,6 @@ prefix = "ctrl+a"
 [ui]
 agent_panel_sort = "spaces"
 sidebar_collapsed_mode = "compact"
+
+[experimental]
+kitty_graphics = true

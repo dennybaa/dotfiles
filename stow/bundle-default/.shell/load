@@ -11,7 +11,6 @@ fi
 if shell_is bash zsh; then
   safe_eval mise activate $_shell
   # safe_eval fnox activate $_shell
-  safe_eval mise completion $_shell
   safe_eval starship init $_shell
   safe_eval wt config shell init $_shell
 fi

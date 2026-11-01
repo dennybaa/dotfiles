@@ -138,6 +138,11 @@ max_fps = 90
 zen_mode = "always"
 zoom_borderless = true
 zoom_size = 100
+# ctrl+click a link: open it in terminal-browser, as a tab when this workspace
+# already has one, else in a new pane.
+# tuios-open lives in the desktop bundle (.local/scripts): it needs a GUI
+# terminal with kitty graphics, so minimal hosts get no link opener.
+link_opener = "tuios-open"
 
 [appearance.sidebar]
 width = 28

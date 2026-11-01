@@ -94,6 +94,9 @@
 
   desktop = [
     latest.ghostty
+    latest.mdfried
+    latest.html2text
+    latest.readability-cli
   ];
 
   desktopFonts = [

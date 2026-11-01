@@ -1,0 +1,9 @@
+font_family = "JetBrainsMono Nerd Font"
+mermaid = "tuios mermaid - --format png --background none"
+
+[theme]
+code_theme = "Tokyo Night"
+#code_fg = "#9d7cd8"
+code_fg = "#bb9af7"
+code_bg = "#24283b"
+hide_codeblock_language = true
