@@ -14,3 +14,20 @@ else
     # Adding fresh
     cd ./nix/${usage_profile} && nix profile add
 fi
+
+# Link the profile's bash completions after the profile changed.
+# bash-completion has a single user dir (no fpath-style list like zsh), so the
+# files have to be linked in; links point through ~/.nix-profile, so their
+# contents follow profile upgrades on their own. Needed here and not in a stow
+# hook: one profile serves every bundle, and this is what changes it.
+# -lname keeps the dangling sweep to links made here (GNU find, Debian has it).
+link_bash_completions() {
+    src=$HOME/.nix-profile/share/bash-completion/completions
+    dir=${BASH_COMPLETION_USER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion}/completions
+    [ -d "$dir" ] && find "$dir" -maxdepth 1 -xtype l -lname "$src/*" -delete
+    [ -d "$src" ] || return 0
+    mkdir -p "$dir"
+    ln -sfn "$src"/* "$dir/"
+}
+
+link_bash_completions

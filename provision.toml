@@ -1,0 +1,66 @@
+# Declarations no package manager can carry (not in nixpkgs, apt or flathub) and
+# that therefore need a bespoke task. Each table names the task that applies it:
+#   [deb] -> mise run pkg:deb          [[skills]] -> mise run pkg:skills
+#   [mime] -> mise run hooks:stow:desktop:_bundle:mimeapps (a stow hook, so
+#             provision:desktop runs it with the bundle)
+#   [stow.<name>] -> mise run stow <name> (mise-tasks/stow/apply)
+# Not general provisioning config - that is mise.toml.
+
+# .deb releases: key = your own label (any name you like), value = URL to the .deb.
+# The package name and version are read from the .deb, so a label can be a reminder
+# ("velo-mail") rather than the dpkg name.
+[deb]
+#velo = "https://github.com/avihaymenahem/velo/releases/download/velo-v0.4.21/Velo_0.4.21_amd64.deb"
+happ = "https://github.com/Happ-proxy/happ-desktop/releases/download/4.5.4/Happ.linux.x64.deb"
+mailspring = "https://github.com/Foundry376/Mailspring/releases/download/1.26.2/mailspring-1.26.2-amd64.deb"
+
+# Single-file .flatpak bundles (not on flathub): key = app id, value = bundle URL.
+# Not implemented yet - `pkg:deb` ignores this table.
+# [flatpak]
+
+# Agent skills, installed globally by the `skills` CLI (into ~/.agents/skills).
+# `source` is whatever the CLI accepts: `owner/repo`, a bare name, or a URL.
+# `name` is optional (omit it to install every skill in the source). `agents` is
+# optional too: omit it to install for every agent the CLI detects (noisy, the
+# agents without a global dir report a failure), or list targets like
+# `agents = ["pi"]` to limit it. No version pin: upgrade with `skills update -g`.
+# tuios is not here - `tuios integration install` writes its own local skill.
+[[skills]]
+source = "sherifabdlnaby/skills"
+name = "mise-fy"
+agents = ["pi"]
+
+[[skills]]
+source = "vercel-labs/skills"
+name = "find-skills"
+#agents = ["pi"]
+
+# Default MIME associations, set with `xdg-mime default` by the
+# hooks:stow:desktop:_bundle:mimeapps hook. Only what the desktop would not pick on its
+# own: keys COSMIC sets (browser, terminal) stay out. Nothing is removed from
+# ~/.config/mimeapps.list, and ~/.config/cosmic-mimeapps.list outranks it for the
+# types it lists, so an entry here can still lose to the desktop.
+[mime]
+"x-scheme-handler/mailto" = "Mailspring.desktop"
+"x-scheme-handler/mailspring" = "Mailspring.desktop"
+
+# Stow bundles: which per-app packages a host gets, and in what order
+# (`packages` order is stow order, then hook order). Applied by
+# `mise run stow <name>`; `mise run stow:show <name>` prints the expansion.
+#
+#   packages = ["pkg", "bundle/pkg"]   bare = this bundle
+#   inherits = [{ stow = "other", exclude_packages = ["pkg"] }]
+#     pulls another bundle's resolved list, optionally dropping packages
+#     from it — the only way to replace a package of one bundle with a variant
+#     from another (stow refuses two owners for one path).
+[stow.minimal]
+packages = [
+  # first: hooks `use dotlib` from it (NU_LIB_DIRS points here)
+  "nushell-scripts",
+  "shell", "git", "tmux", "atuin", "mise", "nvim", "pi", "agents",
+  "gopass", "yazi", "lazygit", "herdr", "worktrunk", "tuios", "podman",
+]
+
+[stow.desktop]
+inherits = [{ stow = "minimal" }]
+packages = ["mise", "systemd", "autostart", "scripts", "ghostty", "mdfried", "vscode", "podman"]

@@ -1,0 +1,166 @@
+#!/usr/bin/env nu
+#MISE description="Stow a bundle declared under [stow.*] in provision.toml, or one bundle/package"
+#MISE hide=true
+#USAGE flag "-D --delete" help="Unstow instead of stow"
+#USAGE flag "--show" help="Print what a bundle expands to (bundle/package per line) and exit"
+#USAGE arg "<target>" help="bundle name (minimal, desktop), or bundle/package (minimal/nvim)" var=#true
+#
+# A bundle is a declared list, not a glob: what a host gets is readable in
+# provision.toml. It is stowed with one `stow -d stow/<bundle>` per owning bundle,
+# because stow takes a single stow directory per invocation.
+# Hooks live in mise-tasks/hooks/stow/<bundle>/<package|_bundle>/ and are
+# dispatched here: <bundle>:<package> per package, <bundle>:_bundle once for a
+# whole bundle.
+
+const Plan = 'provision.toml'
+
+def root [] { $env.MISE_PROJECT_ROOT | path expand }
+
+def qual [own: string, e: string] { if ($e | str contains '/') { $e } else { $"($own)/($e)" } }
+
+def plan [] { open ((root) | path join $Plan) | get -o stow | default {} }
+
+# Flat "bundle/package" list, inherited bundles first, in declared order.
+def expand [name: string, seen: list<string>] {
+    if ($name in $seen) {
+        error make { msg: $"inherits cycle: (($seen | append $name) | str join ' -> ')" }
+    }
+    let d = ((plan) | get -o $name | default {})
+    if ($d | is-empty) {
+        error make { msg: $"bundle ($name) is not declared under [stow] in ($Plan)" }
+    }
+    mut edges = []
+    for e in ($d | get -o inherits | default []) {
+        if not (($e | describe) | str starts-with 'record') {
+            error make { msg: $"inherits entries must be tables: stow = \"bundle\", exclude_packages = [...]; in ($name)" }
+        }
+        let drop = (($e | get -o exclude_packages | default []) | each {|x| qual ($e | get stow) $x })
+        $edges = ($edges | append { stow: ($e | get stow), drop: $drop })
+    }
+    mut out = []
+    for e in $edges {
+        let sub = (expand $e.stow ($seen | append $name))
+        for x in $e.drop {
+            if ($sub | all {|s| $s != $x }) {
+                error make { msg: $"exclude_packages ($x) matched nothing in ($e.stow), inherited by ($name)" }
+            }
+        }
+        $out = ($out | append ($sub | where {|s| $s not-in $e.drop }))
+    }
+    for e in ($d | get -o packages | default []) {
+        $out = ($out | append (qual $name $e))
+    }
+    let dup = ($out | uniq -d)
+    if not ($dup | is-empty) {
+        error make { msg: $"declared twice in bundle ($name): ($dup | str join ', ')" }
+    }
+    for x in $out {
+        if not (((root) | path join 'stow' $x) | path exists) {
+            error make { msg: $"no such package: stow/($x) — referenced by bundle ($name)" }
+        }
+    }
+    $out
+}
+
+# Packages dropped by an inherits edge. Excluding one changes the plan, not the
+# target: an already-linked copy would block its replacement, because stow only
+# owns links of its own stow directory. So they are unstowed before stowing.
+def dropped [name: string, seen: list<string>] {
+    let d = ((plan) | get -o $name | default {})
+    mut out = []
+    for e in ($d | get -o inherits | default []) {
+        for x in (($e | get -o exclude_packages | default []) | each {|x| qual ($e | get stow) $x }) {
+            if (((root) | path join 'stow' $x) | path exists) { $out = ($out | append $x) }
+        }
+        $out = ($out | append (dropped ($e | get stow) ($seen | append $name)))
+    }
+    $out | uniq
+}
+
+def refs [...targets: string] {
+    mut out = []
+    for t in $targets {
+        let p = ($t | split row '/')
+        if ($p | length) > 2 or ($p | any {|x| $x in ['', '.', '..'] }) {
+            error make { msg: $"bad target: ($t) — use a bundle name, or bundle/package" }
+        }
+        if ($p | length) == 2 {
+            if not (((root) | path join 'stow' ...$p) | path exists) {
+                error make { msg: $"no such package: stow/($t)" }
+            }
+            $out = ($out | append { bundle: $p.0, pkg: $p.1, whole: false })
+        } else {
+            for r in (expand $p.0 []) {
+                let q = ($r | split row '/')
+                $out = ($out | append { bundle: $q.0, pkg: $q.1, whole: true })
+            }
+        }
+    }
+    $out
+}
+
+def main [--delete (-D), --show, ...targets: string] {
+    cd (root)
+    if ($targets | is-empty) {
+        error make { msg: 'no target given (bundle name, or bundle/package)' }
+    }
+    let r = (refs ...$targets)
+    if $show {
+        for i in $r { print $"($i.bundle)/($i.pkg)" }
+        return
+    }
+    # An exclusion is only real once the target agrees: unstow what the edges drop.
+    if not $delete {
+        for t in $targets {
+            if not ($t | str contains '/') {
+                let drop = (dropped $t [])
+                for bundle in ($drop | each {|x| $x | split row '/' | first } | uniq) {
+                    let pkgs = ($drop | where {|x| ($x | split row '/' | first) == $bundle } | each {|x| $x | split row '/' | last })
+                    ^stow -D -d $"stow/($bundle)" -v ...$pkgs
+                }
+            }
+        }
+        # Two stow directories cannot be checked against each other by one stow
+        # call, and a failure in the second would leave a half-applied target:
+        # dry-run the whole expansion into a throwaway target first.
+        if (($r | get bundle | uniq | length) > 1) {
+            let tmp = (mktemp -d)
+            for bundle in ($r | get bundle | uniq) {
+                let res = (^stow -t $tmp -d $"stow/($bundle)" ...($r | where bundle == $bundle | get pkg) | complete)
+                if $res.exit_code != 0 {
+                    rm -rf $tmp
+                    error make { msg: $"packages collide in bundle ($bundle):\n($res.stderr | str trim)" }
+                }
+            }
+            rm -rf $tmp
+        }
+    }
+    for bundle in ($r | get bundle | uniq) {
+        let group = ($r | where bundle == $bundle)
+        let pkgs = ($group | get pkg)
+        let hook_args = (if ($group | any {|g| $g.whole }) {
+                [$"($bundle):_bundle"] ++ ($pkgs | each {|p| $"($bundle):($p)" })
+            } else {
+                ($pkgs | each {|p| $"($bundle):($p)" })
+            })
+        if $delete {
+            ^mise run glob --prefix hooks:stow ...$hook_args
+            ^stow -D -d $"stow/($bundle)" -v ...$pkgs
+        } else {
+            let res = (^stow -d $"stow/($bundle)" -v ...$pkgs | complete)
+            if $res.exit_code != 0 {
+                # stow names the path but not its owner; say who holds it, so the
+                # answer is "apply that bundle" rather than a puzzle.
+                let owner = ($res.stderr | lines | where {|l| $l | str contains 'not owned by stow' }
+                    | each {|l|
+                        let rel = ($l | str replace -r '^\s*\*?\s*existing target is not owned by stow:\s*' '' | str trim)
+                        let cur = (do -i { ^readlink ($env.HOME | path join $rel) } | str trim)
+                        $"($rel) is linked to ($cur) — apply the bundle that declares it, or `mise run stow:delete` it first"
+                    })
+                let extra = ($res.stdout | lines | where {|l| $l | str contains 'conflict' })
+                error make { msg: ($extra ++ [$res.stderr] ++ $owner | str join "\n") }
+            }
+            ^mise run glob --prefix hooks:stow ...$hook_args
+        }
+    }
+}

@@ -1,0 +1,9 @@
+[mounts]
+	path = ~/.local/share/gopass/stores/root
+[recipients]
+	hash = 741722b8e653cc6c6cdbcb62c94197cd27eb42c608db76ca27b12aa80259a9fc
+[age]
+	agent-enabled = true
+	agent-timeout = 600
+[pwgen]
+	xkcd-lang = en

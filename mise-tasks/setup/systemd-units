@@ -2,7 +2,7 @@
 #MISE description="Enable/disable systemd user units"
 #MISE raw_args=true
 
-# Use dotfiles libs (stow/nushell-scripts/.config/nushell/scripts/dotlib)
+# Use dotfiles libs (stow/minimal/nushell-scripts/.config/nushell/scripts/dotlib)
 use dotlib systemd
 use dotlib/lib.nu [ 'sudo acquire', 'gum print', 'gum fail', 'color' ]
 

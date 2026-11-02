@@ -1,0 +1,64 @@
+#!/usr/bin/env nu
+#MISE description="Install the agent skills declared under [[skills]] in provision.toml, globally, via the skills CLI"
+const Plan = 'provision.toml'
+
+def norm [source: string] {
+    $source | str lowercase | str replace -r '^https?://github\.com/' '' | str replace -r '\.git$' ''
+}
+
+# Install the [[skills]] entries in provision.toml that are not installed yet.
+def main [] {
+    let root = $env.MISE_PROJECT_ROOT
+    let skills = (open ($root | path join $Plan) | get -o skills | default [])
+    if ($skills | is-empty) { return }
+
+    if (which skills | is-empty) {
+        error make { msg: "skills CLI missing: npm:skills is in stow/desktop/mise/.config/mise/conf.d/code.toml" }
+    }
+
+    let known = (^skills ls -g --json | from json | each {|s| $"($s.name)@(norm ($s.source | default ''))" })
+
+    mut added = 0
+    mut skipped = 0
+    for entry in $skills {
+        let source = ($entry | get -o source)
+        if ($source | is-empty) {
+            error make { msg: $"provision.toml: [[skills]] entry without a source: ($entry | to json -r)" }
+        }
+        let name = ($entry | get -o name)
+        let key = $"($name | default '')@(norm $source)"
+
+        if not ($name | is-empty) and ($known | any {|k| $k == $key }) {
+            $skipped += 1
+            continue
+        }
+
+        mut agents = ($entry | get -o agents | default [])
+        if (($agents | describe) == 'string') { $agents = [$agents] }
+
+        mut args = ['add' $source]
+        if not ($name | is-empty) { $args = ($args ++ ['--skill' $name]) }
+        if not ($agents | is-empty) { $args = ($args ++ ['-a'] ++ $agents) }
+        let cmd = ($args ++ ['-g' '-y'])
+
+        let label = if ($name | is-empty) { $source } else { $name }
+        print -n $"installing ($label)... "
+        let run = (do { ^skills ...$cmd } | complete)
+        if $run.exit_code != 0 {
+            print "failed"
+            let err = ($run.stderr | ansi strip | str trim)
+            let mark = ($run.stdout | ansi strip | lines | each {|l| $l | str trim } | where {|l| $l =~ '■|✗'} | first | default '')
+            let detail = if not ($err | is-empty) { $err } else if not ($mark | is-empty) { $mark } else { "no message" }
+            error make { msg: $"($source): skills add failed: ($detail)" }
+        }
+        print "done"
+        $added += 1
+    }
+
+    # One line, same shape as pkg:deb.
+    if ($added == 0) {
+        print $"($skipped) skill\(s\) already installed"
+        return
+    }
+    print $"($added) skill\(s\) installed, ($skipped) already installed"
+}

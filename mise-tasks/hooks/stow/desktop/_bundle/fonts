@@ -1,0 +1,21 @@
+#!/bin/sh
+#MISE description="Link the nix profile fonts into ~/.local/share/fonts"
+#MISE hide=true
+#
+# Both the system and the nix fontconfig always scan XDG_DATA_HOME/fonts, so a
+# symlink there makes the nix fonts visible to every app — nix or not, session
+# env or not. That replaces wrapping each GUI app with FONTCONFIG_FILE.
+set -e
+
+link=$HOME/.local/share/fonts/nix-fonts
+target=$HOME/.nix-profile/share/fonts/truetype
+
+# plain readlink, not -f: a dangling link must still compare as "wrong" and be replaced
+if [ "$(readlink "$link" 2>/dev/null)" = "$target" ] && [ -e "$target" ]; then
+    echo "fonts: $link already points to $target"
+    exit 0
+fi
+
+mkdir -p "$(dirname "$link")"
+ln -sfn "$target" "$link"
+ls -l "$link"

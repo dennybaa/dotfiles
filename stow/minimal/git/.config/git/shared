@@ -1,0 +1,8 @@
+# Shared git settings; included by ~/.gitconfig (seeded by `mise dot apply`).
+# vim: set noexpandtab shiftwidth=4 tabstop=4:
+[user]
+	email = dennybaa@gmail.com
+	name = Denis Baryshev
+	signingkey = 14085A2CFF3B712A6742F5A16655797179A62346
+[commit]
+	gpgsign = true

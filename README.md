@@ -31,14 +31,15 @@ cd ~/dotfiles && ./bootstrap.sh
 ```
 
 > **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To continue setup in this case, running the command below is **required**:
+>
 > ```shell
 > . /etc/profile.d/nix.sh
 > ```
 
 ## Deploy
 
-Stows `bundle-default` (shell, editors, the global mise config) and applies the templated system
-files (`~/.config/mise`, `~/.config/nix`, `~/.config/systemd`) with `mise dot apply`:
+Stows the `minimal` bundle (shell, editors, the global mise config) and renders the machine config
+that cannot be stowed — anything that embeds a secret or a host-specific include — with `mise dot apply`:
 
 ```shell
 mise run deploy
@@ -73,9 +74,9 @@ mise run provision:desktop
 # Additionally: browser and file associations
 mise run 'setup:desktop:*'
 
-# Desktop applications (happ + sing-box DNS reset) are stowed separately
-# from the presets; this also enables their systemd user units
-mise run stow apps-desktop
+# Desktop applications (happ, sing-box DNS reset) come with the desktop
+# bundle; `stow:show` prints what one expands to
+mise run stow:show desktop
 ```
 
 > **📝 NOTE:** Use `--upgrade` (or `-u`) to also upgrade installed packages and flake inputs.
@@ -93,8 +94,8 @@ mise tasks
 Packages are declared in mise config (`[bootstrap.packages]`), with their repositories in
 `[bootstrap.apt.sources]`:
 
-- `stow/bundle-default/.config/mise/config.toml` – base packages, on every machine
-- `stow/bundle-desktop/.config/mise/conf.d/desktop-packages.toml` – desktop-only packages and apt sources
+- `stow/minimal/mise/.config/mise/config.toml` – base packages, on every machine
+- `stow/desktop/mise/.config/mise/conf.d/desktop-packages.toml` – desktop-only packages
 - `~/.config/mise/config.local.toml` – packages for this machine only (never versioned)
 
 ```shell
@@ -115,6 +116,18 @@ mise bootstrap packages use -g flatpak-user:org.example.App
 
 > **📝 NOTE:** `mise bootstrap packages prune` uninstalls packages no config declares; run it with
 > `--dry-run` first.
+
+### Outside every package manager
+
+[`provision.toml`](provision.toml) holds what no registry can carry, one table per task:
+
+| Table | Command | Action |
+|---|---|---|
+| `[deb]` | `mise run pkg:deb` | fetches each `label = url` into `.cache/debs/` and hands it to apt (bump the URL to upgrade) |
+| `[[skills]]` | `mise run pkg:skills` | installs agent skills into `~/.agents/skills/` |
+| `[mime]` | `mise run stow desktop` | sets default MIME associations (`xdg-mime`), runs with the desktop bundle |
+
+All three run as part of `provision:desktop`.
 
 ### Nix Profile
 

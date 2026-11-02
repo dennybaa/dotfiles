@@ -14,7 +14,16 @@ git stash apply stash@{0}
 
 # Adopt might mangle the content, thus we need to preserve this changes
 filename="$(echo ${message} | sed 's/ /_/')-$(date +'%s')".patch
-stow --adopt -v ${usage_packages}
+
+# Stow takes one stow directory per invocation, so adopt bundle by bundle. The
+# expansion is the same one `mise run stow` uses (provision.toml [stow.*]).
+bundle= && pkgs=()
+flush() { [ ${#pkgs[@]} -eq 0 ] || { stow --adopt -d "stow/$bundle" -v "${pkgs[@]}"; pkgs=(); }; }
+while IFS=/ read -r b p; do
+  [ "$b" = "$bundle" ] || { flush; bundle=$b; }
+  pkgs+=("$p")
+done < <(mise run --raw stow:show ${usage_packages})
+flush
 
 # Grab changes and restore
 git diff 'stash@{0}' >"${filename}"

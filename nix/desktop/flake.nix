@@ -37,6 +37,20 @@
       bundle = import ../bundles.nix { inherit pkgs latest extra; };
     in
     {
-      packages.x86_64-linux.default = import ./desktop.nix { inherit pkgs latest bundle; };
+      packages.x86_64-linux.default = pkgs.symlinkJoin {
+        name = "default";
+        paths =
+          bundle.bootstrap
+          ++ bundle.cliTools
+          ++ bundle.netUtils
+          ++ bundle.podman
+          ++ bundle.kubernetes
+          ++ bundle.desktop
+          ++ bundle.gpuDrivers
+          ++ bundle.desktopFonts
+          ++ bundle.coding
+          ++ bundle.codingDesktop
+          ++ bundle.virt;
+      };
     };
 }

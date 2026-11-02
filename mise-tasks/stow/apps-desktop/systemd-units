@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-#MISE hide=true
-#MISE depends=["setup:systemd-units happ.service happ-reset-dns.service"]

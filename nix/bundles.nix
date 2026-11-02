@@ -86,18 +86,17 @@
   ];
 
   # GPU userspace (mesa vendors, DRI drivers) for nix GUI apps. nixpkgs libglvnd
-  # looks for it in /run/opengl-driver, so that path is linked to this profile
-  # by `mise run setup:opengl-driver`.
+  # looks for it in /run/opengl-driver, which is linked to this profile when
+  # the desktop composition is stowed (mise-tasks/hooks/stow/desktop/_bundle/opengl-driver).
   gpuDrivers = [
     latest.mesa
   ];
 
   desktop = [
-  ];
-
-  # Desktop apps that need the shared fontconfig wrapper (see desktop.nix).
-  desktopWrapped = [
     latest.ghostty
+    latest.mdfried
+    latest.html2text
+    latest.readability-cli
   ];
 
   desktopFonts = [

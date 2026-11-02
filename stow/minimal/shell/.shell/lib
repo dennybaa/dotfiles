@@ -1,0 +1,146 @@
+#!/bin/sh
+# Don't load twice
+# POSIX-Complient lib functions to support profile load in various shells including sh/dash
+
+if (type _dot_define >/dev/null 2>/dev/null); then return; fi
+_DOT_FUNCS="_dot_define"
+
+# Internal helper to track functions
+_dot_define() {
+  _DOT_FUNCS="$_DOT_FUNCS $1"
+}
+
+# Append to PATH (High Performance)
+_dot_define "_dot_append_paths"
+_dot_append_paths() {
+  for _p in "$@"; do
+    [ -d "$_p" ] || continue
+    case ":$PATH:" in
+    *":$_p:"*) ;; # Already there
+    *) export PATH="$PATH:$_p" ;;
+    esac
+  done
+  unset -v _p
+}
+
+# Detect Shell
+_dot_define "_dot_shell"
+_dot_shell() {
+  if [ -n "$ZSH_VERSION" ]; then
+    echo "zsh"
+  elif [ -n "$BASH_VERSION" ]; then
+    echo "bash"
+  else echo "sh"; fi
+}
+# Set helper variable (valid during the execution context and will be unset in the end)
+_shell=$(_dot_shell)
+
+# Cleanup
+_dot_define "unset_lib"
+unset_lib() {
+  # command substitution splits the list in zsh too (a bare $var does not)
+  for _f in $(printf '%s\n' "$_DOT_FUNCS"); do
+    unset -f "$_f"
+  done
+  unset -v _f
+  unset -v _DOT_FUNCS
+  # Help to unset common _shell variable
+  unset -v _shell
+}
+
+# Source file (for ~/.shell/* scripts, can specify for which shells and whether not to clean up)
+_dot_define "source_on"
+source_on() {
+  _path="$1"
+  shift
+  # Check if our shell matches
+  case " $@ " in
+  *" ${_shell:-$(_dot_shell)} "*) . "$_path" ;;
+  "  ") . "$_path" ;; # any shell
+  esac
+  unset -v _path
+}
+
+# Eval safely only if the command exists in path (command -v check)
+_dot_define "safe_eval"
+safe_eval() {
+  _cmd="$1"
+  shift
+  if command -v "$_cmd" >/dev/null 2>&1; then
+    eval "$("$_cmd" "$@")"
+  fi
+  unset -v _cmd
+}
+
+# Source a command ouput if it exists (posix-complient)
+_dot_define "source_cmd"
+source_cmd() {
+  _cmd="$1"
+  shift
+  if command -v "$_cmd" >/dev/null 2>&1; then
+    eval ". /dev/stdin" <<EOF
+$("$_cmd" "$@")
+EOF
+  fi
+  unset -v _cmd
+}
+
+# Generate a tool's completion file for $2 (zsh|bash) from the command in $1,
+# unless that file already matches the installed tool. zsh reads these from
+# fpath (compinit), bash-completion loads them lazily on the first TAB.
+# Freshness = same resolved binary and not replaced since: readlink catches nix
+# store and mise version paths, -nt catches in-place updates (1970 mtimes don't).
+# Subshell: the temporaries never reach the caller.
+_dot_define "gen_completion"
+gen_completion() (
+  [ $# -eq 2 ] || return 1
+  _gc_tool=${1%% *} _gc_sh=$2
+  case $_gc_sh in
+  zsh) _gc_dir=${ZSH_CACHE_DIR:-$HOME/.cache/zsh}/completions _gc_file=$_gc_dir/_$_gc_tool ;;
+  bash) _gc_dir=${BASH_COMPLETION_USER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion}/completions _gc_file=$_gc_dir/$_gc_tool ;;
+  *) return 1 ;;
+  esac
+  _gc_stamp=$_gc_dir/.$_gc_tool-ts
+
+  # force a path search even for a function or alias, such as mise for example
+  if [ -n "${ZSH_VERSION:-}" ]; then
+    _gc_bin=$(whence -p "$_gc_tool" 2>/dev/null)
+  elif [ -n "${BASH_VERSION:-}" ]; then
+    _gc_bin=$(type -P "$_gc_tool" 2>/dev/null)
+  else
+    return 0
+  fi
+  _gc_real=$(readlink -f "$_gc_bin" 2>/dev/null) || _gc_real=$_gc_bin
+
+  if [ ! -x "$_gc_real" ]; then
+    # tool gone (missing, broken link, not executable): drop the cache we made
+    [ -r "$_gc_stamp" ] && rm -f "$_gc_file" "$_gc_stamp"
+    return 0
+  fi
+  _gc_prev=
+  [ -r "$_gc_stamp" ] && read -r _gc_prev <"$_gc_stamp"
+  [ -f "$_gc_file" ] && [ "$_gc_prev" = "$_gc_real" ] &&
+    [ ! "$_gc_real" -nt "$_gc_file" ] && return 0
+
+  # Only install output that is actually a completion script: a tool can exit 0
+  # while printing nothing or an error, and that file would be sourced on TAB.
+  mkdir -p "$_gc_dir" || return 1
+  if eval "$1" >"$_gc_file.$$" 2>/dev/null; then
+    case $_gc_sh in
+    zsh) grep -q '^#compdef' "$_gc_file.$$" ;;
+    bash) grep -q '^[[:space:]]*complete ' "$_gc_file.$$" ;;
+    esac &&
+      mv -f "$_gc_file.$$" "$_gc_file" &&
+      printf '%s\n' "$_gc_real" >"$_gc_stamp" && return 0
+  fi
+  rm -f "$_gc_file.$$"
+)
+
+_dot_define "shell_is"
+shell_is() {
+  # Check if our current $_shell exists in the arguments passed
+  case " $@ " in
+  *" ${_shell:-$(_dot_shell)} "*) return 0 ;;
+  *) return 1 ;;
+  esac
+}
