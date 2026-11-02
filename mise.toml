@@ -21,6 +21,9 @@ github_token = "GITHUB_USER_TOKEN_PUBLIC"
 "~/.config/mise/github_tokens.toml" = { source = "templates/github_tokens.toml", mode = "template", permissions = "0600" }
 "~/.config/nix/nix.conf" = { source = "templates/nix.conf", mode = "template", permissions = "0600" }
 "~/.config/systemd/user.conf" = { source = "templates/user.conf", mode = "template" }
+# Seeded, not stowed: it holds [include] lines and the delta theme.
+# Shared git settings live in ~/.config/git/config (git reads it first).
+"~/.gitconfig" = { source = "templates/gitconfig", mode = "template" }
 
 [tasks.deploy]
 description = "Deploy dotfiles and system config (stow + mise dotfiles)"

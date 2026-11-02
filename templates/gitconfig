@@ -1,0 +1,15 @@
+{# vim: set ft=tera ts=4 sw=4 sts=4 et: #}{{- '' -}}
+# Seeded by `mise dot apply`; the shared settings live in
+# ~/.config/git/shared (stowed). Kept out of git's XDG path (~/.config/git/config,
+# which git reads on its own) so the include is the only source: `--global` reads
+# just this file.
+# Machine-local overrides go in ~/.gitconfig.local (not versioned).
+# vim: set noexpandtab shiftwidth=4 tabstop=4:
+[include]
+	path = ~/.config/git/shared
+	path = ~/.gitconfig.local
+
+[delta]
+	# Delta supports bat, so bat --list-themes, bat cache --build etc
+	syntax-theme = tokyonight_moon
+	side-by-side = false

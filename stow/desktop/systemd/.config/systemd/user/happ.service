@@ -5,9 +5,6 @@ After=wayland-ready.target
 Requires=wayland-ready.target
 
 [Service]
-# Happ bundles libwayland-client 1.20; system mesa EGL needs the 1.23 symbol
-# wl_display_create_queue_with_name. Preload the distro lib instead.
-Environment=LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libwayland-client.so.0
 ExecStart=/usr/bin/happ
 Restart=no
 

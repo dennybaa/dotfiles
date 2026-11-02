@@ -38,8 +38,8 @@ cd ~/dotfiles && ./bootstrap.sh
 
 ## Deploy
 
-Stows the `minimal` bundle (shell, editors, the global mise config) and applies the templated system
-files (`~/.config/mise`, `~/.config/nix`, `~/.config/systemd`) with `mise dot apply`:
+Stows the `minimal` bundle (shell, editors, the global mise config) and renders the machine config
+that cannot be stowed — anything that embeds a secret or a host-specific include — with `mise dot apply`:
 
 ```shell
 mise run deploy
