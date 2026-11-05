@@ -1,16 +1,13 @@
 ---
 name: mise-dotfiles
 description: >
-  Install, pin, bump or remove a host-level package/tool with mise so it lands in this dotfiles repo: `mise
-  use -g` writing the stow-managed ~/.config/mise/config.toml or a conf.d/*.toml bundle fragment, plus where
-  a tool belongs in the first place (mise [tools] vs a Nix bundle vs apt via mise bootstrap vs provision.toml
-  [deb]). Covers backend install syntax (github:/packslip:/aqua:/cargo:/go:/npm:/pypi:/gem:/dotnet:/http:/
-  s3:/vfox:), picking the safest backend, upgrading (`mise up` vs `--bump` vs `mise outdated`, prune
-  grace period, why a `latest` upgrade leaves no git diff), and install failures: unknown backend, no
-  matching version, no matching asset, cosign/SLSA/attestation error, trust prompt, tool not on PATH. Use
-  for "add mise package", "install X globally / system-wide", "put it in dotfiles", "should this be Nix or
-  mise", "upgrade / bump a tool", "mise upgrade does nothing", "mise install fails".
-  Not for a project's own mise.toml [tools], mise tasks, [env], hooks/hk, or auditing an existing setup.
+  Change a host-level package/tool in `~/dotfiles`: install, pin, bump or remove it with
+  `mise use -g` into the stow-managed ~/.config/mise/config.toml or a conf.d bundle fragment, and
+  decide where it belongs (mise [tools] vs a Nix bundle vs apt via mise bootstrap vs provision.toml
+  [deb]). Not for a project's own mise.toml [tools], mise tasks, [env], hooks/hk, auditing an
+  existing setup, or any host whose global config is not this repo's. Use for "add mise package",
+  "install X globally / system-wide", "put it in dotfiles", "should this be Nix or mise",
+  "upgrade / bump a tool", "mise upgrade does nothing", "mise install fails".
 license: MIT
 metadata:
   repo: dennybaa/dotfiles

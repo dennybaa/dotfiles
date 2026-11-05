@@ -23,6 +23,19 @@ _dot_append_paths() {
   unset -v _p
 }
 
+# Prepend: for dirs that must beat /usr/bin (shims)
+_dot_define "_dot_prepend_paths"
+_dot_prepend_paths() {
+  for _p in "$@"; do
+    [ -d "$_p" ] || continue
+    case ":$PATH:" in
+    *":$_p:"*) ;; # Already there
+    *) export PATH="$_p:$PATH" ;;
+    esac
+  done
+  unset -v _p
+}
+
 # Detect Shell
 _dot_define "_dot_shell"
 _dot_shell() {

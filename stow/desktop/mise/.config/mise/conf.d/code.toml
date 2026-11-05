@@ -2,6 +2,7 @@
 go = "1.26"
 node = "24"
 rust = "latest"
-usage = "latest"
+# AI tools
 "npm:@tobilu/qmd" = "latest"
-"npm:skills" = "latest"
+"npm:defuddle" = "latest"
+"npm:knap" = "latest"

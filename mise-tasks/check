@@ -1,0 +1,80 @@
+#!/usr/bin/env nu
+#MISE description="Report tools declared more than once (nix bundles, mise [tools], mise [bootstrap.packages])"
+
+# Notify only, never fails: a name listed twice is often deliberate, such as
+# apt:zsh next to bootstrap.sh's install. Same-source pairs are the ones that rot.
+
+const Nix = 'nix/bundles.nix'
+
+def root [] { $env.MISE_PROJECT_ROOT | path expand }
+
+# One entry per `pkgs.<name>` / `latest.<name>` line, tagged with its bundle list.
+def nix_decls [] {
+    mut bundle = ''
+    mut out = []
+    for line in (open ((root) | path join $Nix) | lines) {
+        if ($line =~ '^  [A-Za-z]+ = \[') {
+            $bundle = ($line | str trim | split row ' ' | first)
+        }
+        if ($line =~ '^\s+(pkgs|latest)\.') {
+            let name = ($line | str trim | str replace -r '^(pkgs|latest)\.' '')
+            $out = ($out | append {
+                tool: ($name | str lowercase | split row '.' | last)
+                where: $"nix/($bundle)"
+                source: 'nix'
+            })
+        }
+    }
+    $out
+}
+
+# `[tools]` and `[bootstrap.packages]` from every stowed mise config. A backend
+# prefix (apt:, npm:, github:) is stripped, so apt:jq and pkgs.jq compare equal.
+def mise_decls [] {
+    let files = (glob ((root) | path join 'stow/*/mise/.config/mise/**/*.toml'))
+    mut out = []
+    for f in $files {
+        let rel = ($f | str replace $"((root))/" '')
+        let doc = (open $f)
+        for section in ['tools' 'bootstrap.packages'] {
+            let table = (if $section == 'tools' {
+                    $doc | get -o tools
+                } else {
+                    $doc | get -o bootstrap | get -o packages
+                } | default { })
+            for name in ($table | columns) {
+                $out = ($out | append {
+                    tool: ($name | str replace -r '^(apt|flatpak-user|npm|github):' ''
+                        | split row '/' | last | str lowercase)
+                    where: $"($rel):($section)"
+                    source: 'mise'
+                })
+            }
+        }
+    }
+    $out
+}
+
+def report [label: string, rows: table] {
+    if ($rows | is-empty) { return }
+    print $label
+    for row in $rows { print $"  ($row.tool): ($row.places | str join ', ')" }
+}
+
+def main [] {
+    let decls = ((nix_decls) ++ (mise_decls))
+    # The same name at the same place twice is one declaration, not two.
+    let groups = ($decls
+        | uniq-by tool where
+        | group-by tool
+        | items {|tool, g| {
+            tool: $tool
+            places: ($g | get where)
+            sources: ($g | get source | uniq)
+        }}
+        | where {|g| ($g.places | length) > 1 })
+
+    report 'two declarations, one source (worth a look):' ($groups | where {|g| ($g.sources | length) == 1 })
+    report 'two sources (shadowing; ignore where intended):' ($groups | where {|g| ($g.sources | length) > 1 })
+    if ($groups | is-empty) { print 'every tool is declared once.' }
+}

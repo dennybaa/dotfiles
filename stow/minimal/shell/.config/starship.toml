@@ -3,7 +3,7 @@
 continuation_prompt = "[∙](fg:lavender) "
 add_newline = true
 follow_symlinks = true
-palette = 'catppuccin_frappe'
+palette = "catppuccin_frappe"
 format = """\
 (${hostname} )\
 (${sudo}${directory} [❯](blue bold) )\
@@ -41,7 +41,6 @@ surface0 = "#414559"
 base = "#303446"
 mantle = "#292c3c"
 crust = "#232634"
-
 
 [profiles]
 
@@ -111,7 +110,6 @@ denied_msg = "denied"
 loaded_msg = "loaded"
 unloaded_msg = "not loaded"
 
-
 [env_var]
 disabled = true
 
@@ -137,7 +135,7 @@ symbol = " "
 style = "yellow bold"
 only_attached = false
 always_show_remote = false
-ignore_branches = ['master', 'main']
+ignore_branches = ["master", "main"]
 ignore_bare_repo = true
 disabled = false
 
@@ -180,7 +178,7 @@ disabled = false
 [time]
 disabled = false
 time_format = "%R"
-format = ' $time '
+format = " $time "
 
 [custom.git_dirty]
 detect_folders = [".git"]

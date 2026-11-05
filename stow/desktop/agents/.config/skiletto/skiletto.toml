@@ -1,0 +1,14 @@
+harnesses = []
+
+[skills]
+bash-scripting = { source = "https://github.com/sickn33/agentic-awesome-skills", path = "skills/bash-scripting" }
+defuddle = { source = "https://github.com/obsidianmd/obsidian-skills", path = "plugins/obsidian/skills/defuddle", ref = "1.1.0" }
+grilling = { source = "https://github.com/mattpocock/skills", path = "skills/productivity/grilling" }
+json-canvas = { source = "https://github.com/obsidianmd/obsidian-skills", path = "plugins/obsidian/skills/json-canvas", ref = "1.1.0" }
+knap = { source = "https://github.com/obsidianmd/obsidian-skills", path = "plugins/obsidian/skills/knap", ref = "1.1.0" }
+mise-fy = { source = "https://github.com/sherifabdlnaby/skills", path = "skills/mise-fy" }
+nushell-pro = { source = "https://github.com/hustcer/nushell-pro", path = "." }
+obsidian-bases = { source = "https://github.com/obsidianmd/obsidian-skills", path = "plugins/obsidian/skills/obsidian-bases", ref = "1.1.0" }
+obsidian-cli = { source = "https://github.com/obsidianmd/obsidian-skills", path = "plugins/obsidian/skills/obsidian-cli", ref = "1.1.0" }
+obsidian-markdown = { source = "https://github.com/obsidianmd/obsidian-skills", path = "plugins/obsidian/skills/obsidian-markdown", ref = "1.1.0" }
+worktrunk = { source = "~/.local/share/mise/installs/worktrunk/latest/.mise-packslip/repo", path = "skills/worktrunk", editable = true }

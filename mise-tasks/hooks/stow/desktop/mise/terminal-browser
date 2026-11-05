@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+# mise installs the tool, but a first provision stows before it exists.
+[ "${hookAction:-create}" = create ] || exit 0
+command -v terminal-browser >/dev/null 2>&1 || exit 0
+
+# setup asks for the skill on /dev/tty; setsid leaves no controlling terminal,
+# so it takes the default (install) instead of blocking a provision.
+setsid terminal-browser setup </dev/null

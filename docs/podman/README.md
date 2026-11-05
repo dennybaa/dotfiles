@@ -2,11 +2,14 @@
 
 ## recommended
 
-Though podman.service has `Delegate=true` which should delegate all available cgroup controllers.
+Though podman.service has `Delegate=true`, which should delegate all available cgroup
+controllers.
 
 ## *Optional* delegate.conf
 
-Can be skipped (Delegate=yes) is usually already set. However k3d documentation suggests a more extended configuration. By default, a non-root user can only get memory controller and PIDs controller to be delegated.
+Can be skipped (Delegate=yes) is usually already set. However k3d documentation suggests a more
+extended configuration. By default, a non-root user can only get memory controller and PIDs
+controller to be delegated.
 
 To run properly we need to enable CPU, CPUSET, and I/O delegation:
 

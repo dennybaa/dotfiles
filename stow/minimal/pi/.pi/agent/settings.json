@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.2",
   "defaultProvider": "opencode-go",
   "defaultModel": "deepseek-v4.1-flash",
   "packages": [
@@ -26,7 +26,8 @@
       ]
     },
     "npm:@dietrichgebert/ponytail",
-    "npm:pi-memory"
+    "npm:pi-memory",
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "theme": "tokyonight-moon",
   "defaultThinkingLevel": "low",
@@ -37,5 +38,9 @@
   "statusbar": {
     "enabled": true,
     "preset": "full"
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.38.0",
+    "{\"source\":\"npm:pi-memory\",\"scope\":\"user\"}": "0.4.2"
   }
 }

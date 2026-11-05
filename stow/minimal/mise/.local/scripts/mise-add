@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Add tools to a bundle's mise conf.d fragment, so the write lands in the repo
+# instead of the nearest config (a bare `mise use` here edits the wrong file).
+# Usage: mise-add [-b <bundle>] -f <fragment|file.toml> <tool[@version]>...
+set -eo pipefail
+
+self=$(readlink -f -- "$(command -v -- "${BASH_SOURCE[0]}")")
+repo=$(git -C "$(dirname "$self")" rev-parse --show-toplevel 2>/dev/null) ||
+  {
+    echo "mise-add: $self is not inside the dotfiles repo" >&2
+    exit 1
+  }
+
+die() {
+  echo "mise-add: $*" >&2
+  exit 1
+}
+
+usage() {
+  echo "usage: mise-add [-b <bundle>] -f <fragment|file.toml> <tool[@version]>..." >&2
+  exit 2
+}
+
+# The provisioned bundle is the nix profile's flake dir: `?dir=nix/desktop`.
+bundle=
+file=
+while getopts ':b:f:' o; do
+  case $o in
+  b) bundle=$OPTARG ;;
+  f) file=$OPTARG ;;
+  *) usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+[ $# -gt 0 ] || usage
+[ -n "$file" ] || usage
+
+[ -n "$bundle" ] ||
+  bundle=$(nix profile list 2>/dev/null | sed -n 's|.*dir=nix/\([^"?[:space:]]*\).*|\1|p' | head -n1)
+[ -n "$bundle" ] || die "no bundle given and nothing to detect it from; pass -b <bundle>"
+
+grep -qxF "[stow.$bundle]" "$repo/provision.toml" || die "no [stow.$bundle] in provision.toml"
+
+mise_dir=$repo/stow/$bundle/mise/.config/mise
+conf_dir=$mise_dir/conf.d
+# A `.toml` name is a path; a bare word is this bundle's fragment.
+link=
+case $file in
+*.toml)
+  path=$(readlink -f -- "$file") || die "no such file: $file"
+  [ -f "$path" ] || die "no such file: $file"
+  ;;
+*)
+  path=$conf_dir/$file.toml
+  [ -f "$path" ] || die "no such fragment: $file (have: $(ls "$conf_dir"/*.toml 2>/dev/null | xargs -rn1 basename | sed 's/\.toml$//' | tr '\n' ' '))"
+  link=$HOME/.config/mise/conf.d/$file.toml
+  ;;
+esac
+
+# A second declaration only shadows the first, and mise rewrites an entry without
+# options it did not ask for, so name the file that already owns the tool.
+declared=$(mise ls --json 2>/dev/null)
+for t in "$@"; do
+  name=${t%%@*}
+  name=${name%%[*}
+  other=
+  while IFS= read -r src; do
+    [ -z "$src" ] || [ "$(readlink -f -- "$src")" = "$path" ] || other=$src
+  done <<<"$(jq -r --arg n "$name" '.[$n][]? | .source.path // empty' <<<"$declared")"
+  [ -z "$other" ] || die "$name is already declared in ${other#"$HOME"/}; remove it there first"
+done
+
+mise use --path "$path" "$@"
+
+# The host reads the stowed copy, so a fragment that is not linked yet is a
+# write nobody sees.
+[ -z "$link" ] || [ -L "$link" ] ||
+  echo "mise-add: $link is not stowed here — run: mise run stow $bundle" >&2

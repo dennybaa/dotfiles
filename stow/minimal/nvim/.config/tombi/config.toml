@@ -1,0 +1,4 @@
+# User-level default: tombi falls back to this when a project has no tombi.toml.
+# A trailing comma still forces an array to stay expanded, whatever the width.
+[format.rules]
+line-width = 120
