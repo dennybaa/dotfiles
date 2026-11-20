@@ -1,0 +1,182 @@
+# User manifest for pi. A user file REPLACES the bundled one whole — no merge, and a
+# block left out is absent rather than inherited — so [detect], [screen], [input],
+# [transcript] and [resume] are copies of tuios v0.12.1's
+# internal/harness/manifests/pi.toml. The bundled `working` rules are left out on
+# purpose: they expect a braille spinner and pi 1.5 draws `── • Working ──`, so
+# neither matched a live pane; the hook reports the turn instead. Read at daemon
+# start (`tuios restart-server`); check with `tuios explain-agent-screen --harness
+# pi -w <pane> --json` and the fixtures in ~/dotfiles/test/tuios.
+schema_version = 1
+id = "pi"
+display_name = "Pi"
+priority = 50
+
+# Measured: pi's bun shim runs as comm "pi", argv ["pi"], exe .../node/24.19.0/bin/node.
+# Node rewrites process.title, so argv_path only helps launches that keep a path.
+[detect]
+comm = ["pi"]
+argv0 = ["pi"]
+argv_path = ["@mariozechner/pi-coding-agent", "@earendil-works/pi-coding-agent", "pi-coding-agent"]
+
+# "pi" is also a plotting tool and a plausible alias; being a Node program is what
+# makes this one the coding agent.
+[detect.require]
+exe_base = ["node", "nodejs", "bun", "deno"]
+exe_glob = ["**/pi-coding-agent/**"]
+
+[screen]
+enabled = true
+fold_case = true
+lines = 12
+
+# rpiv, checkbox list.
+#   Enter to select · ↑/↓ to navigate · Space to toggle · n to add notes · Esc to cancel
+#
+# Ticks are made in the pane: a tick set is several presses and one answer is one
+# key sequence. Outranks 129 because a checkbox tab carries every string 129 wants.
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 130
+region = "bottom_non_empty_lines(6)"
+all = ["Space to toggle"]
+
+[screen.rule.answers]
+deny = { keys = ["esc"] }
+
+# rpiv, numbered one-of-N (also how it asks yes/no). "Type something." is numbered
+# too, so a 3-option question is rows 1-4.
+#   Enter to select · ↑/↓ to navigate · n to add notes · Esc to cancel
+#
+# A digit is the whole answer: rpiv reads a bare 1-9 as "take that row", no Enter.
+# "n to add notes" is required because rpiv drops it while the text field is focused,
+# which is what tells the row list from the field. Nothing later in the line is
+# required, so a footer that clips before "Esc to cancel" still matches.
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 129
+region = "bottom_non_empty_lines(6)"
+all = ["Enter to select", "n to add notes"]
+not = ["Space to toggle"]
+
+[screen.rule.answers]
+choose = "digit"
+deny = { keys = ["esc"] }
+
+# rpiv, the Submit tab of a multi-question form ("to add a note", singular).
+#   ❯ 1. Submit answers   2. Cancel
+#   Enter to select · ↑/↓ to navigate · n to add a note · Esc to cancel
+#
+# The rows are numbered but the picker ignores digits: Enter and Esc act on the
+# highlighted row. Approve therefore presses Enter, which submits while "Submit
+# answers" is the highlighted row.
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 128
+region = "bottom_non_empty_lines(6)"
+all = ["Enter to select", "to add a note"]
+
+[screen.rule.answers]
+approve = { keys = ["enter"] }
+deny = { keys = ["esc"] }
+
+# rpiv, the "Type something." row being typed into. The footer grows two hints and
+# drops the notes hint — that is the only evidence of this state.
+#   Enter to select · ↑/↓ to navigate · Esc to cancel · Shift+Enter for newline · Ctrl+U to clear
+#
+# "Ctrl+U to clear" is what keeps the notes editor out. The checkbox guard keeps the
+# typing states from depending on the dialog's width: that dialog is left to the pane.
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 131
+region = "bottom_non_empty_lines(6)"
+all = ["Shift+Enter for newline", "Ctrl+U to clear"]
+not = ["Space to toggle"]
+
+[screen.rule.answers]
+text = true
+deny = { keys = ["esc"] }
+
+# The same state in a multi-question form, where a split-width dialog clips away both
+# of the hints above. So it is read by absence: a multi-question form ("Tab to switch
+# questions" survives clipping) whose notes hint is gone and which is not the Submit
+# tab. A clipped notes editor looks identical — a line typed there becomes a note,
+# which is visible and is not a wrong answer.
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 132
+region = "bottom_non_empty_lines(6)"
+all = ["Tab to switch questions"]
+not = ["n to add notes", "to add a note", "Space to toggle"]
+
+[screen.rule.answers]
+text = true
+deny = { keys = ["esc"] }
+
+# pi's ctx.ui.confirm draws ctx.ui.select's footer, so the row is the only difference:
+# "→ Yes" is on screen only while Yes is highlighted. Arrowing to No stops the match
+# on purpose — Enter would then answer No while the Inbox still said "approve".
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 121
+region = "bottom_non_empty_lines(6)"
+regex = ["→ Yes"]
+
+[screen.rule.answers]
+approve = { keys = ["enter"] }
+deny = { keys = ["esc"] }
+
+# pi's ctx.ui.input: "enter submit  escape/ctrl+c cancel". The multiline editor says
+# "enter submit" too — the newline hint is what excludes it, since a pasted line
+# would merge into the buffer instead of answering.
+[[screen.rule]]
+state = "needs_input"
+kind = "question"
+priority = 120
+region = "bottom_non_empty_lines(6)"
+all = ["enter submit"]
+not = ["newline"]
+
+[screen.rule.answers]
+text = true
+deny = { keys = ["esc"] }
+
+# No rule for pi's ctx.ui.select (unnumbered rows: nothing to pick) or rpiv's collapsed
+# dialog ("Ctrl+] to expand · Esc to cancel", no options on screen). Both rows are
+# read-only and the peek says so.
+
+# How a prompt is typed in. Not measured.
+[input]
+submit = "cr"
+bracketed_paste = true
+source = "default: Enter sends CR in raw mode; not measured"
+images = "path_text"
+images_source = "measured on pi 0.73.1: a path pasted on its own stays text in the input box, so it goes in the text; that pi reads it at submit is not measured"
+
+# Pi v2/v3 writes a JSONL tree under a folder per working directory, in
+# <agent folder>/sessions, where the agent folder is $PI_CODING_AGENT_DIR or
+# ~/.pi/agent. The hook names the exact file and the person is shown the
+# branch that ends at its last entry. The reader does not infer turn state.
+# Sessions kept anywhere else need a matching manifest rather than a reported
+# path being believed.
+[transcript]
+reader = "pi-jsonl"
+dir = "{pi_agent}/sessions"
+glob = "*/*.jsonl"
+
+# The conversation survives a daemon restart on disk: pi's hooks report the
+# session id, and --session reopens it by exact or partial id. A restored pane
+# lands in the same working directory, which is the project the session was
+# saved under.
+[resume]
+argv = ["pi", "--session", "{session_id}"]
+source = "pi --help: --session <path|id> opens by file path, exact ID, or partial ID"
+# From pi --help (pi 0.73.1). -p/--print, messages, -c/--continue and
+# -r/--resume are left behind. pi's --mode is its output mode, so it stays too.
+keep_options = ["--provider", "--model", "--thinking"]
+keep_source = "pi --help, pi 0.73.1"

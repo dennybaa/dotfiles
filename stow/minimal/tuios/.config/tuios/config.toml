@@ -125,6 +125,12 @@ open_default_window = true
 leader_key = "ctrl+a"
 preset = "tmux"
 
+[[keybindings.command]]
+key = "prefix+alt+s"
+type = "popup"
+command = 'cd ~/code; dir=$(find . -mindepth 2 -maxdepth 2 -type d | fzf) && tuios switch-session --create --cwd "$dir" "$(basename "$dir")"'
+description = "Open a project"
+
 [appearance]
 theme = "tokyo_night_modes"
 hide_window_buttons = true
@@ -134,8 +140,8 @@ show_clock = true
 show_cpu = true
 show_ram = false
 dock_prefix_indicator = "badge"
-max_fps = 90
-zen_mode = "always"
+max_fps = "auto"
+zen_mode = "disabled"
 zoom_borderless = true
 zoom_size = 100
 # ctrl+click a link: open it in terminal-browser, as a tab when this workspace
@@ -143,6 +149,7 @@ zoom_size = 100
 # tuios-open lives in the desktop bundle (.local/scripts): it needs a GUI
 # terminal with kitty graphics, so minimal hosts get no link opener.
 link_opener = "tuios-open"
+scroll_column_width = 88
 
 [appearance.sidebar]
 width = 28
@@ -150,5 +157,17 @@ width = 28
 [appearance.scrollbar]
 style = "track"
 
+[hints]
+open = true
+
+# tuios's {{ repo_path }} is <repo>, the dir holding .git, so no "../" here.
+# wt's {{ repo_path }} is <repo>/.git in a bare-layout repo, so the wt
+# worktree-path template adds the "../".
+[worktree]
+path = "{{ repo_path }}/{{ branch | slug }}"
+
 [spotlight]
 enabled = false
+
+[daemon]
+window_size = "largest"

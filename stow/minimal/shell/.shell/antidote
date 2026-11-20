@@ -26,6 +26,10 @@ if [ -r ~/.nix-profile/share/antidote/antidote.zsh ]; then
   . ~/.nix-profile/share/antidote/antidote.zsh
   antidote load ${HOME}/.zsh_plugins.txt
 
+  # warhol appends its bin dir on every load and PATH is inherited by child shells
+  typeset -U path
+  path=($path)
+
   # zephyr completion style
   if (( $+functions[compstyleinit] )); then
     compstyleinit

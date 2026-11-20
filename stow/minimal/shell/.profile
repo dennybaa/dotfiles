@@ -8,5 +8,7 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-# Load shell tools (cleanup functions in the end)
-. ~/.shell/load && unset_lib
+. ~/.shell/env
+# Tooling (prompt, aliases, completions) and environment for interactive shells
+. ~/.shell/load
+unset_lib

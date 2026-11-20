@@ -47,7 +47,8 @@
 #
 # worktree-path = "~/development/{{ owner }}/{{ repo }}/{{ branch }}"
 #
-# Bare repository (`~/code/myproject/feature-auth`):
+# Bare repository (`<repo>/.git` → `<repo>/feature-auth`); a non-bare repo
+# lands beside it, in `<repo>/../`.
 #
 worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
 #

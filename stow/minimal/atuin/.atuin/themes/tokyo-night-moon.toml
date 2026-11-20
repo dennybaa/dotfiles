@@ -4,19 +4,19 @@ name = "tokyo-night-moon"
 
 [colors]
 # Core text
-Base = "#c8d3f5"       # Moon foreground
-Muted = "#636da6"      # muted blue-grey
-Annotation = "#828bb8" # supporting text
+Base = "#c8d3f5"  # Moon foreground
+Muted = "#636da6"  # muted blue-grey
+Annotation = "#828bb8"  # supporting text
 
 # Alerts
 AlertInfo = "#82aaff"  # blue
 AlertWarn = "#ffc777"  # yellow/orange
-AlertError = "#ff757f" # red
+AlertError = "#ff757f"  # red
 
 # UI emphasis
 Guidance = "#86e1fc"  # cyan
-Important = "#ffc777" # yellow
-Title = "#82aaff"     # blue
+Important = "#ffc777"  # yellow
+Title = "#82aaff"  # blue
 
 # Shell syntax highlighting
 SyntaxCommand = "#82aaff"

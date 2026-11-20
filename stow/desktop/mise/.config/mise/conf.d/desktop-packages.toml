@@ -1,8 +1,8 @@
-[bootstrap.apt.sources.megaio]
-uris = "https://mega.nz/linux/repo/xUbuntu_24.04/"
-suites = "./"
-key = "https://mega.nz/keys/MEGA_signing.key"
-fingerprint = "B01C811880480C854C73EC7E1A664B787094A482"
+# [bootstrap.apt.sources.megaio]
+# uris = "https://mega.nz/linux/repo/xUbuntu_24.04/"
+# suites = "./"
+# key = "https://mega.nz/keys/MEGA_signing.key"
+# fingerprint = "B01C811880480C854C73EC7E1A664B787094A482"
 
 [bootstrap.apt.sources.zerotier]
 uris = "http://download.zerotier.com/debian/bookworm"
@@ -17,7 +17,7 @@ fingerprint = "74A5E9C458E1A431F1DA57A71657198823E52A61"
 "flatpak-user:us.zoom.Zoom" = "latest"
 "flatpak-user:com.brave.Browser" = "latest"
 "flatpak-user:org.keepassxc.KeePassXC" = "latest"
-"apt:megasync" = "latest"
+# "apt:megasync" = "latest"
 "apt:syncthing-gtk" = "latest"
 "apt:transmission-gtk" = "latest"
 "apt:libsecret-1-0" = "latest"

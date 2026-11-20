@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "mailspring": {
+      "url": "http://127.0.0.1:2587/mcp",
+      "headers": {
+        "Authorization": "!jq -r '\"Bearer \" + .[\"*\"] .core.mcp.token' \"$HOME/.config/Mailspring/config.json\""
+      },
+      "description": "Mailspring mail: search and read threads, drafts, labels; send and schedule when enabled",
+      "exposure": "codemode"
+    },
+    "qmd": {
+      "command": "~/.local/share/mise/shims/qmd",
+      "args": ["--index", "obsidian", "mcp"],
+      "description": "Read-only search of my personal notes: Obsidian vault `personal` via qmd index `obsidian`; keyword or semantic; markdown, decisions, docs.",
+      "exposure": "deferred"
+    }
+  }
+}

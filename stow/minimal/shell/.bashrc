@@ -116,5 +116,9 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# Load shell tools (cleanup functions in the end)
-. ~/.shell/load && unset_lib
+# Load stable env (no dynamic paths)
+. ~/.shell/env
+
+# Tooling (prompt, aliases, completions); caller runs unset_lib to clean up
+. ~/.shell/load
+unset_lib

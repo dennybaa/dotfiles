@@ -1,102 +1,168 @@
 # AGENTS.md
 
-Dotfiles and workstation provisioning for Debian/Ubuntu hosts. This file is for agents
-changing the repo; [`README.md`](README.md) is the user-facing setup guide.
+Dotfiles and workstation provisioning for Debian and Ubuntu hosts. This file is for agents
+changing the repository; [`README.md`](README.md) is the guide for whoever runs it.
 
-## The three stages (do not conflate them)
+## The three stages
 
-1. **Bootstrap** — `bootstrap.sh`: installs Nix, mise into `~/.local/bin`, the
-   `nix/bootstrap` profile, and seeds `~/.config/mise/config.local.toml`.
-2. **Deploy** — `mise run deploy`: stows the `minimal` bundle + applies templated files
-   (`mise dot apply`). Needs the `github_token` secret.
-3. **Provision** — `mise run provision:minimal|desktop`: Nix profile, stow packages,
-   then `mise bootstrap packages`.
+Bootstrap needs nothing from the repository, deploy is the same on every host, and provision is
+where a host becomes itself. Each stage is a mise task, and the task in `mise.toml` is the
+authority on what it runs.
+
+1. **Bootstrap** — `bootstrap.sh` installs Nix, adds the `nix/bootstrap` profile (which ships
+   mise), and seeds `~/.config/mise/config.local.toml`.
+2. **Deploy** — `mise run deploy` stows the `minimal` bundle and renders the templates
+   (`mise dot apply`). It needs the `github_token` secret.
+3. **Provision** — `mise run provision:minimal` or `mise run provision:desktop` builds the Nix
+   profile, stows the host's bundle, and applies `mise bootstrap packages`.
 
 ## Layout
 
-| Path | Holds |
-|---|---|
-| `stow/<bundle>/<pkg>/` | Stow bundles and their per-app packages; contents mirror `$HOME` exactly (`.` files included). Which packages a bundle carries is declared in `provision.toml` `[stow.<bundle>]` |
-| `nix/<profile>/` | Flake per profile (`bootstrap`, `minimal`, `desktop`); `bundles.nix` shared package lists |
-| `mise-tasks/<prefix>/<name>` | One mise task per file; path becomes the task name (`hooks/stow/minimal/podman/systemd-units` → `hooks:stow:minimal:podman:systemd-units`) |
-| `mise.toml` | Repo-level tasks (`deploy`, `provision:*`, `stow`) + dotfile templates |
-| `provision.toml` | What no package manager can carry, one table per task that applies it: `[deb]` = `label = url` (installed by `pkg:deb` into `.cache/debs/`), `[[skills]]` = agent skills (installed by `pkg:skills`), `[mime]` = default MIME associations (set by the `hooks:stow:desktop:_bundle:mimeapps` hook), `[stow.<bundle>]` = the package list a bundle carries (`packages`, `inherits`) |
-| `templates/` | Files rendered into `~/.config/...` by `mise dot apply` |
-| `docs/` | Deeper notes (nix, podman) |
+**`stow/<bundle>/<pkg>/`** — the stow packages, grouped by bundle, their contents mirroring
+`$HOME`. The packages a bundle carries are listed in `provision.toml` under `[stow.<bundle>]`.
+
+**`nix/<profile>/`** — one flake per profile, named after its directory (`bootstrap`,
+`minimal` and `desktop` today). The package lists they share live in `nix/bundles.nix`.
+
+**`mise-tasks/<prefix>/<name>`** — one mise task per file, the path becoming the task name, so
+`mise-tasks/hooks/stow/minimal/podman/systemd-units` is
+`hooks:stow:minimal:podman:systemd-units`.
+
+**`mise.toml`** — the repository's own mise config: top-level tasks such as `deploy`,
+`provision:*` and `stow`, plus the templates `mise dot apply` renders.
+
+**`provision.toml`** — what package managers do not cover, such as a `.deb` published only at
+a URL, default MIME associations or the stow plan. Each table opens with a comment saying what
+it holds.
+
+**`stow/desktop/agents/.config/skiletto/skiletto.toml`** — the agent skills this repository
+declares; `skiletto sync -g` restores them from the tracked `skiletto.lock` into
+`~/.agents/skills`.
 
 ## Rules that break things if ignored
 
-- **Stow must run from the repo root.** `.stowrc` is only read from the cwd or `$HOME`,
-  and it sets `--no-folding` (several packages write into the same target dirs). Prefer
-  `mise run stow <bundle>` over a hand-typed `stow` — it also runs the
-  `mise-tasks/hooks/stow/<bundle>/<pkg|_bundle>/` hook tasks.
-- **One owner per path, per bundle.** `desktop` inherits `minimal`, so a package that
-  exists in both would claim the same target path and stow aborts. To replace a package,
-  inherit with `exclude_packages = ["<pkg>"]` and declare the variant — `stow:apply`
-  unstows the excluded copy first, since the exclusion only changes the plan, not the
-  target (`mise run stow:show <bundle>` prints the expansion). Cross-bundle
-  collisions are preflighted into a temp target, so a failed run leaves nothing half-stowed.
-- **Never commit machine-local or secret files:** `~/.config/mise/config.local.toml`,
-  `fnox.local.toml`, `nix/desktop/flake.nix` (gitignored). Secrets come from gopass via
-  fnox; never print or write the token to disk.
-- **Do not hand-edit `flake.lock`** — `mise run nix <profile> --update` refreshes it.
-- **No `~` or absolute paths inside a stow package**; the tree under `stow/<bundle>/<pkg>/` is
-  symlinked verbatim.
+- **Stow runs from the repository root.** Stow reads `.stowrc` only from the current directory
+  or `$HOME`, and it sets `--no-folding`, which several packages need because they write into
+  the same target directories. Use `mise run stow <bundle>`: it pins the directory and runs the
+  hooks in `mise-tasks/hooks/stow/<bundle>/<pkg|_bundle>/`.
+- **Two packages must never link the same file.** Stow aborts the whole run when a target is
+  already another package's. Paths are what count, not package names: `minimal/mise` and
+  `desktop/mise` coexist because no single file appears in both. `desktop` inherits `minimal`,
+  so replacing a package means inheriting with `exclude_packages = ["<pkg>"]` and declaring
+  your own copy, and `stow:apply` unstows the excluded one first. `mise run stow:show <bundle>`
+  prints the expansion, and collisions are checked against a temporary target before anything
+  is written.
+- **Never commit machine-local or secret files**, such as `~/.config/mise/config.local.toml`,
+  `fnox.local.toml` or `nix/desktop/flake.nix`; those are gitignored. Secrets come from gopass
+  through fnox: never print one or write it to disk.
+- **Do not hand-edit `flake.lock`.** `mise run nix <profile> --update` refreshes it with the
+  profile.
+- **Never use `~` or absolute paths inside a stow package.** The tree under
+  `stow/<bundle>/<pkg>/` is symlinked verbatim, so such a path does not resolve on the target
+  host.
 
 ## Where a package goes
 
-Two questions, in that order: **is there a registry that carries it?** and, only if not,
-**which file do I hand to apt?** 1–3 are registries you point a manager at; 4 is a file,
-and apt has no notion of a local one, so its *name* cannot be declared anywhere.
+apt is the right source for the standard OS utilities it already ships well, such as `curl`,
+`nmap` or `tcpdump`, where the distro's version is exactly what you want. It is also the only
+source that installs system-wide, which is what root and system services need — user services
+run in your session and are served as well by nix or mise. When the tool is not a standard
+utility (`ptcpdump`), or a fresher version is wanted than Debian or Ubuntu carry (a newer
+`git`), the user-level sources take over: nix and mise install into your own profile and leave
+the system untouched. Of the two, a nix package arrives complete with its dependencies and
+system libraries, while a mise tool is a single build against a conservative glibc baseline
+that expects the host to have the rest.
 
-1. **nixpkgs** — prebuilt packages, the fresher, rollbackable alternative to the distro's
-   pin: use it when you actually want that version, otherwise stay on apt (2). Add to a
-   list in `nix/bundles.nix`
-   (`latest.` = unstable, `pkgs.` = stable release), `mise run nix <profile> --update`.
-   If nothing prebuilt exists and nixpkgs would compile it, prefer 3 over a derivation to
-   maintain. Extend a shared bundle, never duplicate a list per profile:
-   `bootstrap`/`cliTools`/`coding`/`netUtils`/`podman` reach minimal *and* desktop;
-   `desktop*`/`virt`/`kubernetes`/`codingDesktop`/`gpuDrivers`/`desktopFonts` desktop-only.
-2. **apt repo / Flathub** — the distro path: apt when the version does not matter (curl and
-   other staples) or nix has no prebuilt of it; Flatpak when no nix/mise package exists or
-   the packaging does not matter. `[bootstrap.apt.sources.*]` +
-   `[bootstrap.packages]` in `stow/desktop/mise/.config/mise/conf.d/*.toml`,
-   `mise bootstrap packages upgrade`. Anything apt must own goes here, so
-   `status`/`apply`/`upgrade`/`prune` keep working — never install by hand:
-   `mise bootstrap packages use -n -g apt:foo` (every host) or `… use -n -p
-   stow/desktop/mise/.config/mise/conf.d/desktop-packages.toml flatpak-user:org.Foo`
-   (desktop only), then re-run without `-n`.
-3. **mise** — one tool/CLI (`github:`, `cargo:`, `npm:`, `http:`). `[tools]` in
-   `~/.config/mise/conf.d/*.toml`, `mise up`. About the registry, not about compiling:
-   each tool upgrades on its own, no flake bump or profile rebuild (`cargo:`/`go:` build
-   because that registry builds). `cd ~ && mise use -n -g github:owner/repo`, then again
-   without `-n`. Preferred over 1 when the alternative is a nix build from source: a
-   `github:`/`cargo:` build is cheaper than a derivation to keep alive.
-4. **direct URL** — only a file is published and no apt index carries its name: a `.deb`
-   on a release page, a vendor download link. `[deb]` in `provision.toml` as `label = url`,
-   upgraded by bumping the URL. `mise run pkg:deb` (part of `provision:desktop`; sudo)
-   fetches it into `.cache/debs/` and hands it to `apt-get install`, which owns it
-   afterwards (`apt remove` works; re-runs skip versions already installed).
+1. **nixpkgs** — the fresh, complete package, per user. Use it when the distro does not carry
+   the tool or its version lags, and the tool needs its dependencies. Add it to a list in
+   `nix/bundles.nix` (`latest.` is unstable, `pkgs.` the current stable release) and run
+   `mise run nix <profile> --update`. Extend a bundle that both flakes compose rather than
+   duplicating a list per profile: the `paths` in each flake name the bundles a profile gets.
+   If nixpkgs would have to build the tool from source, prefer mise (3), which leaves nothing
+   to maintain.
+2. **apt repo or Flathub** — the standard OS utilities, at the distro's version, plus anything
+   root or a system service must find, such as `uidmap`'s setuid helpers or a system daemon —
+   only apt provides that. Flatpak only when nothing else carries the app. Packages every host
+   shares are declared in the root `~/.config/mise/config.toml`; desktop-only packages and the
+   apt sources they need live in
+   `stow/desktop/mise/.config/mise/conf.d/desktop-packages.toml`, whose
+   `[bootstrap.apt.sources]` tables are hand-edited. Both are applied by
+   `mise bootstrap packages apply`, and anything apt is to own goes through it, so that
+   `status`, `upgrade` and `prune` keep working; never install by hand.
+   `mise bootstrap packages use -n -g apt:foo` dry-runs a new package for the root config, then
+   repeat without `-n`.
+3. **mise** — where the owner wants the tools they run, fresh and upgrading on their own with
+   `mise up`: no flake bump, no profile rebuild. Default to it for a single CLI or runtime, and
+   take a source or version the owner names as given rather than re-arguing it. `[tools]` lives
+   in the root `~/.config/mise/config.toml`, or in any `~/.config/mise/conf.d/*.toml` that
+   mise loads beside it; here the root file is stowed from `minimal` and the fragments from
+   `desktop`. Write a fragment with `mise-add -f <fragment> <tool>`, which targets the copy in
+   this repository. `-f` is a fragment name that already exists in the bundle's `conf.d/`, or
+   the path of an existing `.toml` file; the bundle itself is detected from the nix profile
+   (`nix/<bundle>`), so pass `-b <bundle>` to target a different one. The tool argument passes
+   through whole, so it carries its source:
+   `mise-add -f <fragment> mytool github:owner/other`. Write the root file with
+   `cd ~ && mise use -g <tool>`.
+4. **direct URL** — a `.deb` only published on a release page, which no apt index carries.
+   Declare it under `[deb]` in `provision.toml` as `label = url`, and upgrade it by bumping the
+   URL. `mise run pkg:deb` (part of `provision:desktop`, needs sudo) fetches it into
+   `.cache/debs/` and hands it to `apt-get install`, which owns it afterwards: `apt remove`
+   works, and a re-run skips a version already installed.
 
-`~/.config/mise/config.toml` is a symlink into `stow/minimal/mise/…`, so `-g` writes
-land in the repo — while a bare `mise use` from the repo root edits the repo's own
-`mise.toml` instead. Host-only packages go in `~/.config/mise/config.local.toml`, which
-is never versioned.
+`mise use` and `mise bootstrap packages use` both take `-n`, which prints the change and
+writes nothing: run with `-n` first, then repeat without it.
 
-Sources don't conflict loudly, they shadow: mise shims beat the nix profile, which beats
-`/usr/bin`. Run `which -a <tool>` before adding a second source for one.
+`~/.config/mise/config.toml` is a symlink into this repository, which is why a `-g` write
+lands here, while a bare `mise use` from the root edits the repository's own `mise.toml`.
+Packages for this host alone go in `~/.config/mise/config.local.toml`, which is never
+versioned. Sources do not conflict loudly; they shadow, with mise shims winning over the nix
+profile and the nix profile over `/usr/bin`, so run `which -a <tool>` before you add a second
+source for a tool.
 
 ## Task and script conventions
 
-- Shell script tasks: `#!/usr/bin/env bash`, `set -eo pipefail`, a
-  `#MISE description="..."` header (plus `#USAGE` when they take arguments). New
-  nushell helpers: `#!/usr/bin/env nu`.
-- Prefer extending an existing task over adding a new one; `mise-tasks/glob` already
-  dispatches `<prefix>:<name>` groups.
-- Yazi plugins are vendored git subtrees — update with `make update-yazi-plugins`,
-  never by editing the plugin files.
-- Neovim is a LazyVim setup; plugin pins live in `lazy-lock.json`.
-- Commits follow the existing conventional style (`feat:`, `fix:`, `chore:`).
+- Shell tasks start with `#!/usr/bin/env bash`, set `set -eo pipefail`, and carry
+  `#MISE description="..."`, plus `#USAGE` when they take arguments. Nushell helpers start
+  with `#!/usr/bin/env nu`.
+- Prefer extending an existing task; `mise-tasks/glob` already dispatches `<prefix>:<name>`
+  groups.
+- Yazi plugins are vendored git subtrees: update them with `make update-yazi-plugins`, never
+  by editing them. Neovim is LazyVim, with plugin pins in `lazy-lock.json`.
+- Commits follow the existing conventional style: `feat:`, `fix:`, `chore:`.
+
+## Formatting
+
+Write files in the shape their formatter produces, so that saving changes nothing, and never
+format by hand around a formatter.
+
+TOML goes to tombi (mise, `~/.config/tombi/config.toml`): a trailing comma keeps an array
+vertical with one value per line, without it the array folds onto one line, and tombi never
+emits a row of several values. Lua, shell and Nix take LazyVim's defaults (stylua, shfmt,
+nixfmt), and mason installs the first two under `$XDG_DATA_HOME/nvim/mason/bin`, so on a host
+without them a save does nothing rather than fail. JSON goes through `jsonls`, and Markdown
+has none, prettier being absent. Only the TOML entry is configured here, in
+`stow/minimal/nvim/.config/nvim/lua/plugins/formatting.lua`, and `:ConformInfo` prints what
+nvim resolves for a file.
+
+## Writing style and comments
+
+This file and the other documentation here are read by people as well as by agents, so write
+full sentences: one idea each, a verb in each, no dropped subjects and no arrows standing in
+for words. Name the file, task or flag you mean, and explain a flag where it first appears.
+Brevity comes from leaving facts out, never from leaving words out. Name a set exhaustively
+only where code enforces it; otherwise illustrate it with "such as".
+
+A comment carries only what the file cannot: why a choice was made, a limit, a workaround, a
+non-obvious ordering. One or two short lines. Never restate the line below it, announce what
+follows, or explain what the code or the schema already shows — if it only answers "what is
+this?", delete it. Re-read every comment you touch; when the code goes, its comment goes with
+it, and never carry a path, a version or a flag forward unchecked. A note kept for later is
+the one exemption and says so (`[flatpak]` in `provision.toml`); a block describing a table
+that no longer exists is dangling, not a note.
+
+In files a person edits by hand (`provision.toml`, `conf.d/*.toml`, templates) the rule flips
+for section headers: one leading comment saying what the section does and the shape of the
+data typed into it, never how the task implements it.
 
 ## Before you call a change done
 
@@ -106,8 +172,9 @@ bash -n <changed-script>
 # nu has no exit-code lint; --ide-check is the LSP parser and always exits 0:
 nu --ide-check 10 <changed.nu> | grep -q '"severity":"Error"' && echo FAIL
 stow -n -v <pkg>                # dry-run the link plan (from the repo root)
+mise run check                  # tools declared twice; notifies, never fails
 mise bootstrap packages apply --dry-run
 ```
 
-Anything touching `bootstrap.sh` or `provision:*` must be re-run end-to-end on a clean
-host (or at minimum verified that the paths it writes are idempotent).
+Anything touching `bootstrap.sh` or `provision:*` must be re-run end-to-end on a clean host,
+or at minimum verified to be idempotent in the paths it writes.

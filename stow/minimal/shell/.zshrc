@@ -1,5 +1,5 @@
-# We are not using global zprofile, so we need to populate env
+# Load stable env (no dynamic paths)
 . ~/.shell/env
-
-# Load shell tools (cleanup functions in the end)
-. ~/.shell/load && unset_lib
+# Tooling (prompt, aliases, completions) and environment for interactive shells
+. ~/.shell/load
+unset_lib

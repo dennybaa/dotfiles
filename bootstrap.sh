@@ -38,11 +38,6 @@ if ! nix profile list | grep -wq 'nix/bootstrap'; then
     bootstrapped=y
 fi
 
-# Install mise into ~/.local/bin (deliberately not from the nix profile)
-if [ ! -x "$HOME/.local/bin/mise" ]; then
-    curl -fsSL https://mise.run | sh
-fi
-
 # Seed the machine-local mise config (never stowed, never versioned)
 mise_local="$HOME/.config/mise/config.local.toml"
 if [ ! -e "$mise_local" ]; then

@@ -51,12 +51,33 @@ fi
 
 # Add y helper function
 if command -v yazi 2>/dev/null 1>&2; then
-  function y() {
+  y() {
     local tmp cwd
     tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
     command yazi "$@" --cwd-file="$tmp"
     IFS= read -r -d '' cwd <"$tmp"
     [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
     command rm -f -- "$tmp"
+  }
+fi
+
+# Worktrunk clone (git bare clone/fetch + wt switch)
+if command -v wt >/dev/null 2>&1; then
+  wtc() {
+    local url=$1 name dest branch
+    [[ -n $url ]] || {
+      echo "usage: wtc <url> [dir] [branch]" >&2
+      return 2
+    }
+
+    url=${url%/}
+    name=${2:-${url##*[:/]}}
+    dest=$PWD/${name%.git}
+
+    git clone --bare -- "$url" "$dest/.git" || return
+    git -C "$dest/.git" config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' || return
+
+    branch=${3:-$(git -C "$dest/.git" symbolic-ref --short HEAD)} || return
+    { cd "$dest" && wt switch "$branch"; } || return
   }
 fi

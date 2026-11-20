@@ -1,3 +1,9 @@
 #!/usr/bin/env sh
 #MISE hide=true
 #MISE depends=["setup:systemd-units import-wayland-env.service wayland-ready.target happ.service happ-reset-dns.service"]
+
+# environment.d is read when the manager starts, not on daemon-reload (which
+# setup:systemd-units already ran), so the stowed PATH needs a re-exec.
+if [ "${hookAction:-create}" != delete ]; then
+  systemctl --user daemon-reexec 2>/dev/null || :
+fi

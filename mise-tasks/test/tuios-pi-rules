@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#MISE description="Check the pi screen rules against tuios' matcher (one fixture per dialog state)"
+#
+# The rules in stow/minimal/tuios/.../harnesses/pi.toml match text on another
+# program's screen. When pi or the ask-question extension rewords a hint, a rule
+# stops matching and the Inbox row silently goes read-only. This runs the fixtures
+# in test/tuios/pi_rules_test.go through tuios' own matcher and names every state
+# whose rule changed.
+#
+# The matcher lives in tuios' internal/harness package, so the test file has to be
+# copied into a tuios source tree of the same version as the installed binary.
+# Without TUIOS_SRC that tree is cloned once into
+# ${XDG_CACHE_HOME:-~/.cache}/dotfiles/tuios-src/<version> and reused.
+#
+# Exit: 0 every state as expected, 1 a rule changed, 2 setup problem.
+
+set -euo pipefail
+
+root=${MISE_PROJECT_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}
+manifest="$root/stow/minimal/tuios/.config/tuios/harnesses/pi.toml"
+fixtures="$root/test/tuios/pi_rules_test.go"
+cache=${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/tuios-src
+
+for f in "$manifest" "$fixtures"; do
+	[ -f "$f" ] || { echo "missing $f" >&2; exit 2; }
+done
+for c in go tuios git; do
+	command -v "$c" >/dev/null || { echo "$c not found" >&2; exit 2; }
+done
+
+version=$(tuios --version 2>/dev/null | sed -n 's/.*[Vv]ersion \([0-9][0-9.]*\).*/\1/p' | head -1)
+[ -n "$version" ] || { echo "cannot read the tuios version" >&2; exit 2; }
+
+src=${TUIOS_SRC:-$cache/$version}
+if [ ! -d "$src/internal/harness" ]; then
+	echo "cloning tuios v$version into $src (once)" >&2
+	mkdir -p "$(dirname "$src")"
+	git clone --quiet --depth 1 --branch "v$version" https://github.com/Gaurav-Gosain/tuios "$src"
+fi
+
+target="$src/internal/harness/zz_pi_rules_test.go"
+trap 'rm -f "$target"' EXIT
+cp "$fixtures" "$target"
+
+cd "$src"
+# -count=1: the manifest is read through an environment variable, which the test
+# cache does not track, so a cached pass would hide a manifest that no longer works.
+PI_MANIFEST="$manifest" go test ./internal/harness -run TestPiRules -count=1 -v

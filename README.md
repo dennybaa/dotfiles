@@ -8,7 +8,8 @@ Setting up a workstation takes three steps:
 
 ## Prerequisites
 
-This setup requires the [dennybaa/dotfiles](https://github.com/dennybaa/dotfiles) repository. Install Git and clone the repository:
+This setup requires the [dennybaa/dotfiles](https://github.com/dennybaa/dotfiles) repository.
+Install Git and clone the repository:
 
 ```shell
 sudo apt install git -y
@@ -22,15 +23,16 @@ cd ~ && git clone git@github.com:dennybaa/dotfiles.git
 
 ## Bootstrap
 
-[`bootstrap.sh`](bootstrap.sh) installs Nix (if missing), mise into `~/.local/bin`, and the
-`nix/bootstrap` profile. It also seeds `~/.config/mise/config.local.toml`, which holds
+[`bootstrap.sh`](bootstrap.sh) installs Nix (if missing) and the `nix/bootstrap` profile,
+which ships mise. It also seeds `~/.config/mise/config.local.toml`, which holds
 packages for this machine only and is never versioned.
 
 ```shell
 cd ~/dotfiles && ./bootstrap.sh
 ```
 
-> **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To continue setup in this case, running the command below is **required**:
+> **✅ Action required:** Before a relogin happens, the Nix bootstrap profile is not sourced. To
+> continue setup in this case, running the command below is **required**:
 >
 > ```shell
 > . /etc/profile.d/nix.sh
@@ -39,7 +41,8 @@ cd ~/dotfiles && ./bootstrap.sh
 ## Deploy
 
 Stows the `minimal` bundle (shell, editors, the global mise config) and renders the machine config
-that cannot be stowed — anything that embeds a secret or a host-specific include — with `mise dot apply`:
+that cannot be stowed — anything that embeds a secret or a host-specific include — with
+`mise dot apply`:
 
 ```shell
 mise run deploy
@@ -49,7 +52,7 @@ mise run deploy
 > is available, mise asks for it once and keeps it in memory for that run — nothing is written to
 > disk:
 >
-> ```
+> ```text
 > Enter bootstrap secret github_token
 > > ********
 > ```
@@ -122,12 +125,23 @@ mise bootstrap packages use -g flatpak-user:org.example.App
 [`provision.toml`](provision.toml) holds what no registry can carry, one table per task:
 
 | Table | Command | Action |
-|---|---|---|
+| --- | --- | --- |
 | `[deb]` | `mise run pkg:deb` | fetches each `label = url` into `.cache/debs/` and hands it to apt (bump the URL to upgrade) |
-| `[[skills]]` | `mise run pkg:skills` | installs agent skills into `~/.agents/skills/` |
 | `[mime]` | `mise run stow desktop` | sets default MIME associations (`xdg-mime`), runs with the desktop bundle |
 
-All three run as part of `provision:desktop`.
+Both run as part of `provision:desktop`.
+
+### Tools
+
+A mise tool added with `mise-add` lands in one `conf.d/<fragment>.toml` (`cli`, `code`,
+`kube`, `desktop-packages`) of a bundle — never in the config mise happens to find first:
+
+```shell
+mise-add -f code <tool>@<version>   # -b <bundle> defaults to the host's nix profile
+```
+
+- **[skiletto](https://github.com/kumekay/skiletto)** - agent skills: `skiletto sync -g` (or
+  `tto sync -g`) restores them from the tracked lock.
 
 ### Nix Profile
 
@@ -139,7 +153,8 @@ Install a profile:
 mise run nix desktop
 ```
 
-After installing the main profile, clean up the bootstrap profile to avoid overlap (recommended, but not necessary):
+After installing the main profile, clean up the bootstrap profile to avoid overlap
+(recommended, but not necessary):
 
 ```shell
 mise run nix:rm bootstrap

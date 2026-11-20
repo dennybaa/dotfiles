@@ -1,5 +1,4 @@
-# Common shell tools for flakes
-# Use: latest for unstable, pkgs for the latest stable release
+# Package lists shared by the flakes: pkgs. by default, latest. only where stable lacks a package or lags it.
 {
   pkgs,
   latest,
@@ -12,8 +11,7 @@
     latest.stow
     latest.delta
     latest.gum
-    # Currently handling mise via official script installer
-    # latest.mise
+    latest.mise
     latest.nushell
     pkgs.jq
   ];
@@ -30,23 +28,22 @@
     # vim
     pkgs.neovim
     pkgs.tree-sitter
-    pkgs.vimPlugins.LazyVim
 
     # utils
     latest.yazi
     latest.lazygit
-    latest.bat
+    pkgs.bat
     pkgs.zoxide
     pkgs.fzf
     pkgs.ripgrep
     pkgs.fd
     pkgs.wl-clipboard
+    pkgs.rclone
   ]
   # Add extra cli tools loaded from separate flakes
   ++ (extra.cliTools or [ ]);
 
   coding = [
-    pkgs.jq
     pkgs.yq
     # nvim base (gcc can be required for tree-sitter)
     pkgs.gcc
@@ -58,7 +55,17 @@
     pkgs.nixfmt
     pkgs.nixd
     pkgs.statix
-  ];
+
+    # Tools
+    latest.mdfried
+    latest.html2text
+    latest.readability-cli
+
+    # AI tools
+    latest.graphify
+  ]
+  # Add extra desktop tools loaded from extra.nix
+  ++ (extra.codingDesktop or [ ]);
 
   netUtils = [
     latest.grpcurl
@@ -71,6 +78,7 @@
     pkgs.docker-credential-helpers
     pkgs.docker-compose
     pkgs.docker-buildx
+    pkgs.lazydocker
   ];
 
   virt = [
@@ -81,7 +89,6 @@
   ];
 
   kubernetes = [
-    pkgs.k9s
     pkgs.sops
   ];
 
@@ -94,9 +101,6 @@
 
   desktop = [
     latest.ghostty
-    latest.mdfried
-    latest.html2text
-    latest.readability-cli
   ];
 
   desktopFonts = [

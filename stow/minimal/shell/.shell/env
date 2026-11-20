@@ -1,48 +1,38 @@
 #!/bin/sh
 # vim: set filetype=sh:
-# Environment file is loaded in .profile and in .bashrc/.zshrc which makes it
-# a right place for tools which should be loaded for non-interactive shells.
+# Session env, sourced by the login profiles and .zshrc. Stable paths only: a
+# shell that never activates mise resolves versions at exec time via the shims.
 #
 . ~/.shell/lib
 
-# Append custom PATHS
-_dot_append_paths \
-  "${HOME}/.local/bin" \
-  "${HOME}/.local/scripts"
-
-# zsh: index completions shipped by nix profile derivations (env is sh-sourced too,
-# so the array assignment has to sit behind eval)
-if [ -n "${ZSH_VERSION:-}" ]; then
-  eval 'fpath=("${HOME}/.nix-profile/share/zsh/site-functions" $fpath)'
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# Code for none interactive shells (load tools which update PATH)
-case $- in
-*i*) ;;
-*)
-  # Don't rely on ~/.local/share/mise/shims in PATH, but rather set statically the global env
-  eval $(cd $HOME && mise env)
-  ;;
-esac
+# Prepend: shims must beat /usr/bin; activate still precedes them in shells
+_dot_prepend_paths "${HOME}/.local/share/mise/shims"
 
-# Use Podman instead of Docker if it is available
-if podman -v >/dev/null 2>/dev/null; then
+# nvim's mason bin (stylua, shfmt, lsp servers): nvim prepends it itself, nothing else does
+_dot_append_paths \
+  "${HOME}/.local/bin" \
+  "${HOME}/.local/scripts" \
+  "${KREW_ROOT:-$HOME/.krew}/bin" \
+  "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason/bin"
+
+# `cargo install` lands here: mise provides cargo itself, not what it installs.
+# Uncomment when a cargo-installed binary is actually in use.
+# _dot_append_paths "${HOME}/.cargo/bin"
+
+# pnpm globals: binaries from `pnpm add -g` land in PNPM_HOME
+if command -v pnpm >/dev/null 2>&1; then
+  export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+  _dot_append_paths "$PNPM_HOME"
+fi
+
+# Docker clients (compose, buildx) talk to podman's compat socket
+if command -v podman >/dev/null 2>&1; then
   export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
   export DOCKER_SOCK=$XDG_RUNTIME_DIR/podman/podman.sock
 fi
 
-# Setup Pnpm if available
-if pnpm -v >/dev/null 2>/dev/null; then
-  export PNPM_HOME="/home/dennybaa/.local/share/pnpm"
-  case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-  esac
-fi
-
-# Exports
 export EDITOR=nvim
-export GPG_TTY=$(tty)
-
-# Add krew
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"

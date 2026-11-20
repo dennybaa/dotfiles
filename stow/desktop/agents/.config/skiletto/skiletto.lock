@@ -1,0 +1,83 @@
+version = 1
+
+[[skill]]
+name = 'defuddle'
+source = 'https://github.com/obsidianmd/obsidian-skills'
+path = 'plugins/obsidian/skills/defuddle'
+ref = '1.1.0'
+commit = '95b7225be131939ce0ae3dfe728bf82337ad56aa'
+hash = 'sha256:43e11cb03ffefec0b8b7ac8247d5bc3eed1938c7fc2989b520d7d5c718679be4'
+
+[[skill]]
+name = 'json-canvas'
+source = 'https://github.com/obsidianmd/obsidian-skills'
+path = 'plugins/obsidian/skills/json-canvas'
+ref = '1.1.0'
+commit = '95b7225be131939ce0ae3dfe728bf82337ad56aa'
+hash = 'sha256:379bb474fa3213ae050280b93b8058971da482d234da44eb29548a5c5aa51fc1'
+
+[[skill]]
+name = 'knap'
+source = 'https://github.com/obsidianmd/obsidian-skills'
+path = 'plugins/obsidian/skills/knap'
+ref = '1.1.0'
+commit = '95b7225be131939ce0ae3dfe728bf82337ad56aa'
+hash = 'sha256:3e44f9663f956771700a343d74ddb59cf2230ec59229e3cab3765c2a8076eeb6'
+
+[[skill]]
+name = 'mise-fy'
+source = 'https://github.com/sherifabdlnaby/skills'
+path = 'skills/mise-fy'
+commit = 'fbce52771caf76652465abdcfc6b2a9122be4c58'
+hash = 'sha256:eab5a530ab8c58352f4d2b0819606bdee2c147cfcd29d5af93c3ebfbee6f29a0'
+
+[[skill]]
+name = 'nushell-pro'
+source = 'https://github.com/hustcer/nushell-pro'
+path = '.'
+commit = 'b55100a1b9605ffa9d019eef2a9480789f61946e'
+hash = 'sha256:3b032bbbdd3ab171b1c48ac8ecab455c41ce7289e8d3499a1306025cf642aafb'
+
+[[skill]]
+name = 'obsidian-bases'
+source = 'https://github.com/obsidianmd/obsidian-skills'
+path = 'plugins/obsidian/skills/obsidian-bases'
+ref = '1.1.0'
+commit = '95b7225be131939ce0ae3dfe728bf82337ad56aa'
+hash = 'sha256:44c73174fef18d0b3a478c56a710d644e8177c330df3b4937843b0bb1a9dc48f'
+
+[[skill]]
+name = 'obsidian-cli'
+source = 'https://github.com/obsidianmd/obsidian-skills'
+path = 'plugins/obsidian/skills/obsidian-cli'
+ref = '1.1.0'
+commit = '95b7225be131939ce0ae3dfe728bf82337ad56aa'
+hash = 'sha256:672e8955f78a88ff43025d9f11db581e65fefc4375eb7ef78f64578a341c9632'
+
+[[skill]]
+name = 'obsidian-markdown'
+source = 'https://github.com/obsidianmd/obsidian-skills'
+path = 'plugins/obsidian/skills/obsidian-markdown'
+ref = '1.1.0'
+commit = '95b7225be131939ce0ae3dfe728bf82337ad56aa'
+hash = 'sha256:a8970912df1b845fcb37fe9552f4a4df44650c13ff20aa1e1d34d4537b66795b'
+
+[[skill]]
+name = 'worktrunk'
+source = '~/.local/share/mise/installs/worktrunk/latest/.mise-packslip/repo'
+path = 'skills/worktrunk'
+editable = true
+
+[[skill]]
+name = 'grilling'
+source = 'https://github.com/mattpocock/skills'
+path = 'skills/productivity/grilling'
+commit = '5863806dd4e15c63174bee4e7515a4256792ecfa'
+hash = 'sha256:27f71f106a7062691b2982d4f847304a62930ebed8b50734f4d4fd498d60afa8'
+
+[[skill]]
+name = 'bash-scripting'
+source = 'https://github.com/sickn33/agentic-awesome-skills'
+path = 'skills/bash-scripting'
+commit = '8f1eb06978b026c5434284202c22215792c3071c'
+hash = 'sha256:d52e49c0939ac55d58eb9f9d4679964cb66cbf5204401492b23a4b3df5b4b16b'

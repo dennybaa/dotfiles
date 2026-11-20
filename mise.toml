@@ -20,7 +20,7 @@ github_token = "GITHUB_USER_TOKEN_PUBLIC"
 [dotfiles]
 "~/.config/mise/github_tokens.toml" = { source = "templates/github_tokens.toml", mode = "template", permissions = "0600" }
 "~/.config/nix/nix.conf" = { source = "templates/nix.conf", mode = "template", permissions = "0600" }
-"~/.config/systemd/user.conf" = { source = "templates/user.conf", mode = "template" }
+"~/.config/systemd/user.conf" = { source = "templates/user.conf", mode = "template", permissions = "0644" }
 # Seeded, not stowed: it holds [include] lines and the delta theme.
 # Shared git settings live in ~/.config/git/config (git reads it first).
 "~/.gitconfig" = { source = "templates/gitconfig", mode = "template" }
@@ -29,25 +29,25 @@ github_token = "GITHUB_USER_TOKEN_PUBLIC"
 description = "Deploy dotfiles and system config (stow + mise dotfiles)"
 depends = [{ task = "stow", args = ["minimal"] }]
 secrets = ["GITHUB_USER_TOKEN_PUBLIC"]
-run = 'mise dot apply --prompt-secrets'
+run = ["mise dot apply --prompt-secrets"]
 
 [tasks."nix:rm"]
 description = "Remove nix profile"
 usage = 'arg "profile"               help="Specifies profile to remove"'
-run = 'nix profile remove nix/{{ usage.profile }}'
+run = "nix profile remove nix/{{ usage.profile }}"
 
 [tasks."nix:cleanup"]
 description = "Run nix-collect-garbage"
-run = 'nix-collect-garbage'
+run = "nix-collect-garbage"
 
 [tasks."provision:minimal"]
 description = "Provision minimal system"
 usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
-  'mise run nix ${usage_upgrade:+--update} minimal',
-  'mise run stow minimal',
-  'mise bootstrap packages apply ${usage_upgrade:+--update}',
+  "mise run nix ${usage_upgrade:+--update} minimal",
+  "mise run stow minimal",
+  "mise bootstrap packages apply ${usage_upgrade:+--update}",
   '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
   # 'mise run --raw setup:systemd-linger',
 ]
@@ -57,12 +57,12 @@ description = "Provision desktop system"
 usage = 'flag "-u --upgrade" help="Upgrade installed packages and flake inputs"'
 interactive = true
 run = [
-  'mise run nix ${usage_upgrade:+--update} desktop',
-  'mise run stow desktop',
-  'mise bootstrap packages apply ${usage_upgrade:+--update}',
+  "mise run nix ${usage_upgrade:+--update} desktop",
+  "mise run stow desktop",
+  "mise bootstrap packages apply ${usage_upgrade:+--update}",
   '[ -z "$usage_upgrade" ] || mise bootstrap packages upgrade',
-  'mise run pkg:deb',
-  'mise run pkg:skills',
+  "mise run pkg:deb",
+  "skiletto sync -g",
   # 'mise run --raw setup:systemd-linger',
 ]
 
@@ -73,8 +73,8 @@ arg "<targets>" help="Bundle name (minimal, desktop), or bundle/package (minimal
 '''
 # cwd must be the repo root: .stowrc is read from there
 # (stow only looks in cwd and $HOME)
-dir = '{{ config_root }}'
-run = 'mise run stow:apply ${usage_targets}'
+dir = "{{ config_root }}"
+run = "mise run stow:apply ${usage_targets}"
 
 [tasks."stow:delete"]
 description = "Unstow a bundle or one package"
@@ -82,13 +82,13 @@ usage = '''
 arg "<targets>" help="Bundle name (minimal, desktop), or bundle/package (minimal/nvim)" var=#true
 '''
 env = { hookAction = "delete" }
-dir = '{{ config_root }}'
-run = 'mise run stow:apply --delete ${usage_targets}'
+dir = "{{ config_root }}"
+run = "mise run stow:apply --delete ${usage_targets}"
 
 [tasks."stow:show"]
 description = "Print what a bundle expands to"
 usage = '''
 arg "<targets>" help="Bundle name (minimal, desktop), or bundle/package (minimal/nvim)" var=#true
 '''
-dir = '{{ config_root }}'
-run = 'mise run stow:apply --show ${usage_targets}'
+dir = "{{ config_root }}"
+run = "mise run stow:apply --show ${usage_targets}"

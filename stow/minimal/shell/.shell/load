@@ -2,20 +2,21 @@
 # vim: set filetype=sh:
 . ~/.shell/lib
 
-# Source nix profile on any shell
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+# .profile sources this too, and a login can be non-interactive: tooling only when
+# someone is at a prompt.
+case $- in *i*) ;; *) return ;; esac
+
+# Activate for supported shells
+if shell_is zsh bash; then
+  safe_eval mise activate "$_shell"
 fi
 
-# Eaarly load for bash+zsh tools
 if shell_is bash zsh; then
-  safe_eval mise activate $_shell
-  # safe_eval fnox activate $_shell
   safe_eval starship init $_shell
   safe_eval wt config shell init $_shell
 fi
 
-# Non-uniform setup
+# Bash specific
 case "$_shell" in
 bash)
   safe_eval zoxide init --cmd ${ZOXIDE_CMD_OVERRIDE:-z} bash
@@ -23,20 +24,22 @@ bash)
   ;;
 esac
 
-# Source tools and functions
-source_on ~/.shell/antidote zsh
+# fpath array: the assignment has to sit behind eval because this file is sh-sourced
+if [ -n "${ZSH_VERSION:-}" ]; then
+  eval 'fpath=("${HOME}/.nix-profile/share/zsh/site-functions" $fpath)'
+
+  # Load antidote after fpath is set
+  . ~/.shell/antidote
+fi
+
 source_on ~/.shell/functions bash zsh
 source_on ~/.shell/completions bash zsh
 
-# Late load tools
-if shell_is bash zsh; then
-  # source_cmd usage g completion-init "$_shell"
-  :
-fi
+# gpg needs a tty for pinentry-wukong
+export GPG_TTY=$(tty)
 
-# Aliases
 alias ta="tmux a"
-alias her="herdr"
-alias pa="pi --model longcat-2.5-preview-free -p"
+alias pa="pi --model longcat-2.5-free -p"
+alias tui="TUIOS_CELL_FRAME=0 tuios"
 
-## Note!: run unset_lib in caller to clean up lib functions
+# Caller runs unset_lib to clean up lib functions

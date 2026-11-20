@@ -1,0 +1,6 @@
+{
+  // MD013: prose wraps at 96, matching AGENTS.md; fenced code and tables are exempt.
+  "config": { "MD013": { "line_length": 96, "code_blocks": false, "tables": false } },
+  // stow/ markdown is vendored (plugin docs, skill files), not our prose.
+  "ignores": ["stow/**"]
+}
